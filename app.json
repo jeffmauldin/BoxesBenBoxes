@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Boxes - Classic Dot Game",
+    "slug": "boxes-classic-dots",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#FAF7EE"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jamsoft68.boxes"
+    },
+    "android": {
+      "package": "com.jamsoft68.boxes",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FAF7EE",
+        "foregroundImage": "./assets/icon.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    }
+  }
+}

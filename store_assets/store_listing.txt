@@ -1,0 +1,27 @@
+=== APP TITLE (Max 30 characters) ===
+Boxes: Classic Dot Game
+
+=== SHORT DESCRIPTION (Max 80 characters) ===
+The classic restaurant placemat dot game! Connect dots, close boxes & win.
+
+=== FULL DESCRIPTION (Up to 4000 characters) ===
+Remember sitting at a restaurant diner booth with family, waiting for your food, armed with crayons and a kids' menu or paper placemat? 
+
+"Boxes" (also known around the world as Dots and Boxes, Pigs in a Pen, or the Dot Game) brings that pure, nostalgic pen-and-paper experience to your phone and tablet. No crumpled napkins, no running out of ink, and no unevenly drawn dot grids!
+
+🎓 LOVED BY TOP STUDENTS & THINKERS
+Loved by highly successful academic students, engineers, and strategists, Boxes is much more than simple entertainment. It encourages deep spatial observation, pattern recognition, concentration, and multi-move forward planning. Every line you draw either sets a trap or leaves an opening for your opponent!
+
+✨ KEY FEATURES:
+• PURE PASS-AND-PLAY FUN: Designed for 2 or 3 players (up to 4) sharing a single device. Look up, laugh, and play with your kids, parents, friends, or siblings right next to you.
+• INSTANT GRID PRESETS: Start playing in seconds! Choose from Quick (3×3 dots / 4 boxes, ~2 min), Classic (4×4 dots / 9 boxes, ~5 min), Standard (5×5 dots / 16 boxes), Challenge (6×6 dots), or build your own custom grid size.
+• CUSTOM INITIALS & CRAYON COLORS: Personalize each player with their own name, initial stamp, and classic restaurant crayon palette (Crayon Red, Royal Blue, Forest Green, Warm Orange, and Berry Purple).
+• SMOOTH & FORGIVING TOUCH: Generous line hitboxes mean no frustrating mis-taps on small mobile screens. Tapping between dots is effortless for both young kids and adults.
+• OPTIONAL UNDO: Want to allow do-overs for friendly learning matches? Toggle Undo ON in setup. Prefer the authentic "you made your mark, that's it" feeling? Keep it OFF. (And never any undo after the match concludes—just a fresh rematch!).
+• MATCH RECORDS: Keeps a clean scoreboard of your past matches, winners, and scores so family rivalries are officially recorded—with an easy one-tap reset whenever you want a clean slate.
+• RESPECTFUL EXPERIENCE: No obnoxious 60-second video spam interruptions mid-game. A polite banner and short, capped breaks preserve the authentic joy of the game.
+
+Rediscover the timeless restaurant tradition that entertained generations before smartphones existed. Grab a friend, tap your first line, and see who can claim the most boxes!
+
+=== KEYWORDS / TAGS ===
+dots and boxes, boxes game, dot connector, pigs in a pen, pen and paper games, restaurant games, diner games, kids menu game, classic board games, pass and play, 2 player games, 3 player games, family offline games, concentration puzzle, brain strategy game
