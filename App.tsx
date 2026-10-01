@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { SetupScreen } from './src/screens/SetupScreen';
 import { GameScreen } from './src/screens/GameScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
@@ -45,35 +46,37 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.container}>
-        {currentScreen === 'setup' && (
-          <>
-            <SetupScreen
-              onStartGame={handleStartGame}
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+        <StatusBar style="dark" />
+        <View style={styles.container}>
+          {currentScreen === 'setup' && (
+            <>
+              <SetupScreen
+                onStartGame={handleStartGame}
+                onOpenHistory={handleOpenHistory}
+              />
+              <AdBanner testMode={true} />
+            </>
+          )}
+
+          {currentScreen === 'game' && activeGame && (
+            <GameScreen
+              gridRows={activeGame.rows}
+              gridCols={activeGame.cols}
+              players={activeGame.players}
+              allowUndo={activeGame.allowUndo}
+              onExitToMenu={handleExitToMenu}
               onOpenHistory={handleOpenHistory}
             />
-            <AdBanner testMode={true} />
-          </>
-        )}
+          )}
 
-        {currentScreen === 'game' && activeGame && (
-          <GameScreen
-            gridRows={activeGame.rows}
-            gridCols={activeGame.cols}
-            players={activeGame.players}
-            allowUndo={activeGame.allowUndo}
-            onExitToMenu={handleExitToMenu}
-            onOpenHistory={handleOpenHistory}
-          />
-        )}
-
-        {currentScreen === 'history' && (
-          <HistoryScreen onBack={handleBackToSetup} />
-        )}
-      </View>
-    </SafeAreaView>
+          {currentScreen === 'history' && (
+            <HistoryScreen onBack={handleBackToSetup} />
+          )}
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
