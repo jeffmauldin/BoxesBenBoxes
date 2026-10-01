@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Animated,
 } from 'react-native';
 import { EdgeOrientation, FinishedGameRecord, GameState, Player } from '../types/game';
 import {
@@ -44,6 +45,36 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const [quitModalVisible, setQuitModalVisible] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pencilAnim = useRef(new Animated.Value(0)).current;
+
+  // AI thinking pencil wiggle animation
+  useEffect(() => {
+    if (isAIThinking) {
+      const wiggleLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pencilAnim, {
+            toValue: -1,
+            duration: 110,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pencilAnim, {
+            toValue: 1,
+            duration: 110,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pencilAnim, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      wiggleLoop.start();
+      return () => wiggleLoop.stop();
+    } else {
+      pencilAnim.setValue(0);
+    }
+  }, [isAIThinking]);
 
   // Automatically save match result when game ends
   useEffect(() => {
@@ -96,7 +127,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           );
         }
         setIsAIThinking(false);
-      }, 650); // 650ms observation delay
+      }, 700); // 700ms observation delay with pencil wiggle
     } else {
       setIsAIThinking(false);
     }
@@ -150,8 +181,25 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           </Text>
           {isAIThinking && (
             <View style={styles.thinkingPill}>
+              <Animated.Text
+                style={[
+                  styles.pencilWiggle,
+                  {
+                    transform: [
+                      {
+                        rotate: pencilAnim.interpolate({
+                          inputRange: [-1, 0, 1],
+                          outputRange: ['-25deg', '0deg', '25deg'],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                ✏️
+              </Animated.Text>
               <Text style={styles.thinkingPillText}>
-                {activePlayer.name} is thinking... 🤔
+                {activePlayer.name} is thinking...
               </Text>
             </View>
           )}
@@ -271,6 +319,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FFE0B2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  pencilWiggle: {
+    fontSize: 13,
   },
   thinkingPillText: {
     fontSize: 11,

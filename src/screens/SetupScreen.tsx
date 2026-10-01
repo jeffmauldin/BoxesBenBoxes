@@ -115,6 +115,9 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
     });
   };
 
+// Session-level flag: prompt appears at most once per session
+let sessionDismissedComputerPrompt = false;
+
   const handleSelectOpponentType = (index: number, type: 'human' | ComputerDifficulty) => {
     if (type === 'human') {
       setPlayers((prev) => {
@@ -128,8 +131,24 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         return updated;
       });
     } else {
-      // Trigger the anti-computer prompt
-      setPendingComputerChange({ playerIndex: index, difficulty: type });
+      if (sessionDismissedComputerPrompt) {
+        // Already acknowledged for this session, apply directly
+        const botDef = COMPUTER_TYPES.find((b) => b.id === type)!;
+        setPlayers((prev) => {
+          const updated = [...prev];
+          updated[index] = {
+            ...updated[index],
+            name: botDef.label.split(' ')[0] + ' ' + botDef.label.split(' ')[1],
+            initial: botDef.initial,
+            isComputer: true,
+            computerDifficulty: type,
+          };
+          return updated;
+        });
+      } else {
+        // Trigger the anti-computer prompt for first time in session
+        setPendingComputerChange({ playerIndex: index, difficulty: type });
+      }
     }
   };
 
@@ -137,6 +156,8 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
     if (!pendingComputerChange) return;
     const { playerIndex, difficulty } = pendingComputerChange;
     const botDef = COMPUTER_TYPES.find((b) => b.id === difficulty)!;
+
+    sessionDismissedComputerPrompt = true; // remember for this session
 
     setPlayers((prev) => {
       const updated = [...prev];
