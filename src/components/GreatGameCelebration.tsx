@@ -4,8 +4,9 @@ import {
   Text,
   StyleSheet,
   Animated,
-  Dimensions,
   TouchableOpacity,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { GameState } from '../types/game';
 import { THEME } from '../constants/theme';
@@ -16,6 +17,7 @@ interface GreatGameCelebrationProps {
   onRematch: () => void;
   onNewSetup: () => void;
   onViewHistory: () => void;
+  onClose?: () => void;
 }
 
 const CONFETTI_COLORS = ['#E53935', '#1E88E5', '#43A047', '#FB8C00', '#8E24AA', '#FFD54F', '#00ACC1'];
@@ -26,6 +28,7 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
   onRematch,
   onNewSetup,
   onViewHistory,
+  onClose,
 }) => {
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -92,132 +95,174 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
   const isTie = winners.length > 1;
 
   return (
-    <View style={styles.overlay}>
-      {/* Animated Confetti Rain */}
-      <View style={styles.confettiContainer} pointerEvents="none">
-        {confettiAnimValues.map((item, idx) => {
-          const rotateInterpolate = item.rot.interpolate({
-            inputRange: [0, 1],
-            outputRange: ['0deg', `${(idx % 2 === 0 ? 1 : -1) * 360}deg`],
-          });
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose || onNewSetup}
+      statusBarTranslucent
+    >
+      <View style={styles.overlay}>
+        {/* Animated Confetti Rain */}
+        <View style={styles.confettiContainer} pointerEvents="none">
+          {confettiAnimValues.map((item, idx) => {
+            const rotateInterpolate = item.rot.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0deg', `${(idx % 2 === 0 ? 1 : -1) * 360}deg`],
+            });
 
-          return (
-            <Animated.View
-              key={idx}
-              style={[
-                styles.confettiPiece,
-                {
-                  width: item.size,
-                  height: item.size * 0.6,
-                  backgroundColor: item.color,
-                  transform: [
-                    { translateX: item.x },
-                    { translateY: item.y },
-                    { rotate: rotateInterpolate },
-                  ],
-                },
-              ]}
-            />
-          );
-        })}
-      </View>
-
-      {/* Main Celebration Card */}
-      <Animated.View
-        style={[
-          styles.card,
-          {
-            opacity: opacityAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        <View style={styles.bannerBadge}>
-          <Text style={styles.bannerBadgeText}>✨ GREAT GAME! ✨</Text>
-        </View>
-
-        <Text style={styles.title}>
-          {isTie
-            ? '🤝 A Thrilling Tie!'
-            : `🏆 ${winners[0].name} Wins!`}
-        </Text>
-
-        <Text style={styles.subtitle}>
-          {isTie
-            ? `Tied between ${winners.map((w) => w.name).join(' & ')}!`
-            : `Phenomenal observation & strategy with ${winners[0].score} boxes!`}
-        </Text>
-
-        <View style={styles.scoresList}>
-          {state.players.map((p) => {
-            const isWinner = state.winnerIds.includes(p.id);
             return (
-              <View
-                key={p.id}
+              <Animated.View
+                key={idx}
                 style={[
-                  styles.scoreRow,
-                  isWinner && styles.winnerScoreRow,
+                  styles.confettiPiece,
+                  {
+                    width: item.size,
+                    height: item.size * 0.6,
+                    backgroundColor: item.color,
+                    transform: [
+                      { translateX: item.x },
+                      { translateY: item.y },
+                      { rotate: rotateInterpolate },
+                    ],
+                  },
                 ]}
-              >
-                <View style={styles.playerInfo}>
-                  <View style={[styles.avatarBadge, { backgroundColor: p.color }]}>
-                    <Text style={styles.avatarText}>{p.initial}</Text>
-                  </View>
-                  <Text style={[styles.playerName, isWinner && styles.winnerText]}>
-                    {p.name} {p.isComputer ? '🤖' : ''}
-                  </Text>
-                </View>
-                <View style={styles.scorePill}>
-                  <Text style={[styles.scoreNumber, { color: p.color }]}>
-                    {p.score}
-                  </Text>
-                  <Text style={styles.scoreLabel}>
-                    {p.score === 1 ? 'box' : 'boxes'}
-                  </Text>
-                </View>
-              </View>
+              />
             );
           })}
         </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.rematchBtn}
-            onPress={onRematch}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.rematchBtnText}>🔄 Play Rematch</Text>
-          </TouchableOpacity>
+        {/* Main Celebration Card */}
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              opacity: opacityAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          {onClose && (
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={onClose}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.closeBtnText}>✕</Text>
+            </TouchableOpacity>
+          )}
 
-          <TouchableOpacity
-            style={styles.setupBtn}
-            onPress={onNewSetup}
-            activeOpacity={0.8}
+          <ScrollView
+            style={styles.cardScroll}
+            contentContainerStyle={styles.cardScrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
           >
-            <Text style={styles.setupBtnText}>⚙ Change Setup</Text>
-          </TouchableOpacity>
+            <View style={styles.bannerBadge}>
+              <Text style={styles.bannerBadgeText}>✨ GREAT GAME! ✨</Text>
+            </View>
 
-          <TouchableOpacity
-            style={styles.historyBtn}
-            onPress={onViewHistory}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.historyBtnText}>📜 View Match Records</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    </View>
+            <Text style={styles.title}>
+              {isTie
+                ? '🤝 A Thrilling Tie!'
+                : `🏆 ${winners[0].name} Wins!`}
+            </Text>
+
+            <Text style={styles.subtitle}>
+              {isTie
+                ? `Tied between ${winners.map((w) => w.name).join(' & ')}!`
+                : `Phenomenal observation & strategy with ${winners[0].score} boxes!`}
+            </Text>
+
+            <View style={styles.scoresList}>
+              {state.players.map((p) => {
+                const isWinner = state.winnerIds.includes(p.id);
+                return (
+                  <View
+                    key={p.id}
+                    style={[
+                      styles.scoreRow,
+                      isWinner && styles.winnerScoreRow,
+                    ]}
+                  >
+                    <View style={styles.playerInfo}>
+                      <View style={[styles.avatarBadge, { backgroundColor: p.color }]}>
+                        <Text style={styles.avatarText}>{p.initial}</Text>
+                      </View>
+                      <Text style={[styles.playerName, isWinner && styles.winnerText]}>
+                        {p.name} {p.isComputer ? '🤖' : ''}
+                      </Text>
+                    </View>
+                    <View style={styles.scorePill}>
+                      <Text style={[styles.scoreNumber, { color: p.color }]}>
+                        {p.score}
+                      </Text>
+                      <Text style={styles.scoreLabel}>
+                        {p.score === 1 ? 'box' : 'boxes'}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+
+            <View style={styles.actions}>
+              {/* Primary action to return to setup */}
+              <TouchableOpacity
+                style={styles.setupBtn}
+                onPress={onNewSetup}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.setupBtnText}>⚙ Change Game Setup</Text>
+                <Text style={styles.setupBtnSubtext}>
+                  Change board size, players & opponents
+                </Text>
+              </TouchableOpacity>
+
+              {/* Rematch action */}
+              <TouchableOpacity
+                style={styles.rematchBtn}
+                onPress={onRematch}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.rematchBtnText}>🔄 Play Rematch (Same Setup)</Text>
+              </TouchableOpacity>
+
+              {/* Option to inspect board */}
+              {onClose && (
+                <TouchableOpacity
+                  style={styles.inspectBtn}
+                  onPress={onClose}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.inspectBtnText}>👀 Inspect Finished Board</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* History action */}
+              <TouchableOpacity
+                style={styles.historyBtn}
+                onPress={onViewHistory}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.historyBtnText}>📜 View Past Match Records</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </Animated.View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFill,
+    flex: 1,
     backgroundColor: 'rgba(25, 20, 15, 0.72)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 100,
-    padding: 20,
+    padding: 16,
   },
   confettiContainer: {
     ...StyleSheet.absoluteFill,
@@ -232,17 +277,43 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 360,
+    maxHeight: '85%',
     backgroundColor: '#FAF7EE',
     borderRadius: 24,
     borderWidth: 2.5,
     borderColor: '#E6DEC9',
-    padding: 22,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#EAE4D5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  closeBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: THEME.textSecondary,
+    lineHeight: 16,
+  },
+  cardScroll: {
+    width: '100%',
+  },
+  cardScrollContent: {
+    alignItems: 'center',
+    padding: 20,
   },
   bannerBadge: {
     backgroundColor: THEME.accent,
@@ -250,6 +321,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     marginBottom: 10,
+    marginTop: 4,
   },
   bannerBadgeText: {
     color: '#FFFFFF',
@@ -270,11 +342,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 18,
+    paddingHorizontal: 8,
   },
   scoresList: {
     width: '100%',
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   scoreRow: {
     flexDirection: 'row',
@@ -335,36 +408,58 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 8,
   },
-  rematchBtn: {
+  setupBtn: {
     backgroundColor: THEME.accent,
-    paddingVertical: 13,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 14,
     alignItems: 'center',
+    shadowColor: THEME.accent,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  rematchBtnText: {
+  setupBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
   },
-  setupBtn: {
+  setupBtnSubtext: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 11,
+    marginTop: 1,
+    fontWeight: '500',
+  },
+  rematchBtn: {
     backgroundColor: '#EFE9DA',
-    paddingVertical: 10,
+    paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#D8CEBA',
   },
-  setupBtnText: {
+  rematchBtnText: {
     color: THEME.textPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  inspectBtn: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  inspectBtnText: {
+    color: THEME.textSecondary,
     fontSize: 13,
     fontWeight: '600',
   },
   historyBtn: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     alignItems: 'center',
   },
   historyBtnText: {
-    color: THEME.textSecondary,
+    color: THEME.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },

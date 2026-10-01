@@ -43,6 +43,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   );
 
   const [quitModalVisible, setQuitModalVisible] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pencilAnim = useRef(new Animated.Value(0)).current;
@@ -76,9 +77,10 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     }
   }, [isAIThinking]);
 
-  // Automatically save match result when game ends
+  // Automatically save match result and show celebration when game ends
   useEffect(() => {
     if (gameState.isGameOver) {
+      setShowCelebration(true);
       const winners = gameState.players.filter((p) =>
         gameState.winnerIds.includes(p.id)
       );
@@ -101,6 +103,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       };
 
       saveFinishedGame(record);
+    } else {
+      setShowCelebration(false);
     }
   }, [gameState.isGameOver]);
 
@@ -159,7 +163,18 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const handleRematch = () => {
     if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
     setIsAIThinking(false);
+    setShowCelebration(false);
     setGameState(createInitialState(gridRows, gridCols, players, allowUndo));
+  };
+
+  const handleExitPress = () => {
+    if (gameState.isGameOver) {
+      if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
+      setShowCelebration(false);
+      onExitToMenu();
+    } else {
+      setQuitModalVisible(true);
+    }
   };
 
   const activePlayer = gameState.players[gameState.currentPlayerIndex];
@@ -170,9 +185,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       <View style={styles.navBar}>
         <TouchableOpacity
           style={styles.navBtn}
-          onPress={() => setQuitModalVisible(true)}
+          onPress={handleExitPress}
         >
-          <Text style={styles.navBtnText}>✕ Exit</Text>
+          <Text style={styles.navBtnText}>← Setup</Text>
         </TouchableOpacity>
 
         <View style={styles.navCenter}>
@@ -225,16 +240,49 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         <BoardView state={gameState} onClaimEdge={handleClaimEdge} />
       </View>
 
+      {/* Persistent Game Over Action Bar */}
+      {gameState.isGameOver && (
+        <View style={styles.gameOverBar}>
+          <TouchableOpacity
+            style={styles.gameOverSetupBtn}
+            onPress={onExitToMenu}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.gameOverSetupBtnText}>⚙ Change Setup</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gameOverRematchBtn}
+            onPress={handleRematch}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.gameOverRematchBtnText}>🔄 Rematch</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gameOverResultsBtn}
+            onPress={() => setShowCelebration(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.gameOverResultsBtnText}>🏆 Results</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Non-intrusive Kid-Friendly Ad Banner at bottom */}
       <AdBanner testMode={true} />
 
-      {/* Animated Great Game Celebration */}
+      {/* Animated Great Game Celebration Modal */}
       <GreatGameCelebration
-        visible={gameState.isGameOver}
+        visible={showCelebration}
         state={gameState}
         onRematch={handleRematch}
-        onNewSetup={onExitToMenu}
+        onNewSetup={() => {
+          setShowCelebration(false);
+          onExitToMenu();
+        }}
         onViewHistory={onOpenHistory}
+        onClose={() => setShowCelebration(false)}
       />
 
       {/* Exit Confirmation Modal */}
@@ -246,16 +294,16 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Leave Current Match?</Text>
+            <Text style={styles.modalTitle}>Return to Setup?</Text>
             <Text style={styles.modalMessage}>
-              Current match progress will be lost. Return to the setup screen?
+              Current match progress will be lost. Return to the setup screen to change board size, players, or settings?
             </Text>
             <View style={styles.modalBtnRow}>
               <TouchableOpacity
                 style={styles.cancelBtn}
                 onPress={() => setQuitModalVisible(false)}
               >
-                <Text style={styles.cancelBtnText}>Continue Game</Text>
+                <Text style={styles.cancelBtnText}>Keep Playing</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmExitBtn}
@@ -265,7 +313,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
                   onExitToMenu();
                 }}
               >
-                <Text style={styles.confirmExitBtnText}>Exit to Menu</Text>
+                <Text style={styles.confirmExitBtnText}>Return to Setup</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -392,5 +440,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  gameOverBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FAF7EE',
+    borderTopWidth: 1,
+    borderTopColor: THEME.paperBorder,
+    gap: 8,
+  },
+  gameOverSetupBtn: {
+    flex: 1.3,
+    backgroundColor: THEME.accent,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: THEME.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  gameOverSetupBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
+  },
+  gameOverRematchBtn: {
+    flex: 1,
+    backgroundColor: '#EFE9DA',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D8CEBA',
+  },
+  gameOverRematchBtnText: {
+    color: THEME.textPrimary,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  gameOverResultsBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#FFF3E0',
+    borderWidth: 1,
+    borderColor: '#FFE0B2',
+    alignItems: 'center',
+  },
+  gameOverResultsBtnText: {
+    color: '#E65100',
+    fontWeight: '800',
+    fontSize: 13,
   },
 });
