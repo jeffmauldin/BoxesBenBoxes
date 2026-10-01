@@ -1,0 +1,123 @@
+[
+  {
+    "matchId": "test_123",
+    "timestamp": "2026-10-01T21:00:00Z",
+    "deviceId": "test_dev",
+    "handle": "Test Player",
+    "gridRows": 3,
+    "gridCols": 3,
+    "totalBoxes": 4,
+    "players": [
+      {
+        "name": "A",
+        "initial": "A",
+        "color": "#E53935",
+        "score": 2,
+        "isComputer": false
+      }
+    ],
+    "winnerNames": [
+      "A"
+    ],
+    "isTie": false,
+    "boardBoxes": "0000"
+  },
+  {
+    "matchId": "m_1727824800_ben_dad",
+    "timestamp": "2026-10-01T20:30:00Z",
+    "deviceId": "dev_ben_tablet",
+    "handle": "Ben & Dad",
+    "gridRows": 4,
+    "gridCols": 4,
+    "totalBoxes": 9,
+    "players": [
+      {
+        "name": "Ben",
+        "initial": "B",
+        "color": "#1E88E5",
+        "score": 5,
+        "isComputer": false
+      },
+      {
+        "name": "Dad",
+        "initial": "D",
+        "color": "#E53935",
+        "score": 4,
+        "isComputer": false
+      }
+    ],
+    "winnerNames": [
+      "Ben"
+    ],
+    "isTie": false,
+    "boardBoxes": "001101001"
+  },
+  {
+    "matchId": "m_1727823900_minimizer",
+    "timestamp": "2026-10-01T19:45:00Z",
+    "deviceId": "dev_alex_phone",
+    "handle": "Alex M.",
+    "gridRows": 3,
+    "gridCols": 3,
+    "totalBoxes": 4,
+    "players": [
+      {
+        "name": "Alex",
+        "initial": "A",
+        "color": "#43A047",
+        "score": 1,
+        "isComputer": false
+      },
+      {
+        "name": "Minimizer Dude",
+        "initial": "MD",
+        "color": "#FB8C00",
+        "score": 3,
+        "isComputer": true
+      }
+    ],
+    "winnerNames": [
+      "Minimizer Dude"
+    ],
+    "isTie": false,
+    "boardBoxes": "1101"
+  },
+  {
+    "matchId": "m_1727822500_family_tie",
+    "timestamp": "2026-10-01T18:15:00Z",
+    "deviceId": "dev_kitchen_ipad",
+    "handle": "Sunday Placemat Duel",
+    "gridRows": 4,
+    "gridCols": 4,
+    "totalBoxes": 9,
+    "players": [
+      {
+        "name": "Mom",
+        "initial": "M",
+        "color": "#8E24AA",
+        "score": 4,
+        "isComputer": false
+      },
+      {
+        "name": "Ben",
+        "initial": "B",
+        "color": "#1E88E5",
+        "score": 4,
+        "isComputer": false
+      },
+      {
+        "name": "Sees Boxes Dude",
+        "initial": "SB",
+        "color": "#00ACC1",
+        "score": 1,
+        "isComputer": true
+      }
+    ],
+    "winnerNames": [
+      "Mom",
+      "Ben"
+    ],
+    "isTie": true,
+    "boardBoxes": "010120101"
+  }
+]

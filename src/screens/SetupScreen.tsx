@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { DEFAULT_PLAYER_PALETTES, GAME_PRESETS } from '../constants/presets';
 import { THEME } from '../constants/theme';
 import { ComputerDifficulty, Player } from '../types/game';
+import { loadDeviceProfile, saveDeviceProfile } from '../logic/worldSync';
 
 interface SetupScreenProps {
   onStartGame: (
@@ -48,6 +49,18 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   const [customCols, setCustomCols] = useState<number>(4);
   const [numPlayers, setNumPlayers] = useState<number>(2);
   const [allowUndo, setAllowUndo] = useState<boolean>(false);
+  const [playerHandle, setPlayerHandle] = useState<string>('');
+
+  useEffect(() => {
+    loadDeviceProfile().then((profile) => {
+      setPlayerHandle(profile.handle);
+    });
+  }, []);
+
+  const handleUpdateHandle = (newHandle: string) => {
+    setPlayerHandle(newHandle);
+    saveDeviceProfile({ handle: newHandle.trim() || undefined });
+  };
 
   const [players, setPlayers] = useState<PlayerSetupState[]>([
     {
@@ -457,6 +470,26 @@ let sessionDismissedComputerPrompt = false;
             thumbColor={allowUndo ? '#FFFFFF' : '#F4F0E6'}
           />
         </View>
+
+        <View style={styles.optionDivider} />
+
+        <View style={styles.optionRow}>
+          <View style={styles.optionTextContainer}>
+            <Text style={styles.optionTitle}>Public / Family Handle</Text>
+            <Text style={styles.optionSubtitle}>
+              Your display name for the world match feed.
+            </Text>
+          </View>
+          <TextInput
+            style={styles.handleInput}
+            value={playerHandle}
+            onChangeText={handleUpdateHandle}
+            placeholder="e.g. Ben & Dad"
+            placeholderTextColor={THEME.textMuted}
+            maxLength={22}
+            autoCorrect={false}
+          />
+        </View>
       </View>
 
       {/* Start Game & History Buttons */}
@@ -767,6 +800,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: THEME.textMuted,
     marginTop: 2,
+  },
+  optionDivider: {
+    height: 1,
+    backgroundColor: THEME.paperBorder,
+    marginVertical: 10,
+  },
+  handleInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: THEME.paperBorder,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 13,
+    fontWeight: '700',
+    color: THEME.textPrimary,
+    minWidth: 130,
+    textAlign: 'right',
   },
   actionButtonGroup: {
     gap: 10,

@@ -15,6 +15,7 @@ import {
 } from '../logic/gameEngine';
 import { computeAIMove } from '../logic/ai/aiOpponents';
 import { saveFinishedGame } from '../logic/storage';
+import { submitGlobalMatchResult } from '../logic/worldSync';
 import { ScoreBar } from '../components/ScoreBar';
 import { BoardView } from '../components/BoardView';
 import { GreatGameCelebration } from '../components/GreatGameCelebration';
@@ -103,6 +104,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       };
 
       saveFinishedGame(record);
+      submitGlobalMatchResult(gameState);
     } else {
       setShowCelebration(false);
     }

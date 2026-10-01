@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoxesBenBoxes — Global Match Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper-bg: #FAF7EE;
+      --paper-card: #FFFFFF;
+      --paper-border: #E6DEC9;
+      --text-primary: #2C261F;
+      --text-secondary: #6B6255;
+      --accent: #E5533D;
+      --accent-hover: #D1402B;
+      --winner-gold: #FFD54F;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--paper-bg);
+      color: var(--text-primary);
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(#E2D9C5 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    header {
+      background-color: #FAF4E6;
+      border-bottom: 2px dashed var(--paper-border);
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background-color: var(--accent);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Stats Grid */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background-color: var(--paper-card);
+      border: 1.5px solid var(--paper-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Feed Section */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .refresh-btn {
+      background-color: #EFE8D8;
+      border: 1.5px solid #DDD3BE;
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+    }
+
+    .refresh-btn:hover {
+      background-color: #E5DCB5;
+    }
+
+    /* Match List */
+    .matches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .match-card {
+      background-color: var(--paper-card);
+      border: 2px solid var(--paper-border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(44, 38, 31, 0.04);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .match-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(44, 38, 31, 0.08);
+      border-color: #D6CCA8;
+    }
+
+    .match-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--paper-border);
+      padding-bottom: 10px;
+    }
+
+    .match-handle {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .match-grid-badge {
+      background-color: #F2ECE0;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+    }
+
+    .match-time {
+      font-size: 12px;
+      color: #9C9384;
+    }
+
+    .match-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .players-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .player-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #FAF8F2;
+      border: 1px solid var(--paper-border);
+      padding: 4px 10px;
+      border-radius: 10px;
+    }
+
+    .player-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+    }
+
+    .player-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .player-score {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .winner-pill {
+      background-color: #FFF8E1;
+      border: 1.5px solid var(--winner-gold);
+      color: #8A6400;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal Board Viewer */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(30, 25, 20, 0.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background-color: #FFFDF9;
+      border: 2.5px solid var(--paper-border);
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background-color: #EFE9DA;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .modal-board-canvas {
+      margin: 16px auto;
+      border-radius: 14px;
+      background-color: #FAF7EE;
+      border: 1.5px solid var(--paper-border);
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-top: 1px dashed var(--paper-border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-badge">LIVE RESTAURANT PLACEMAT NETWORK</div>
+    <h1>BoxesBenBoxes World</h1>
+    <div class="tagline">Every match played across the table, live around the globe</div>
+  </header>
+
+  <main class="container">
+    <!-- Live Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total-games">0</div>
+        <div class="stat-label">Total Matches Logged</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-active-grid">4×4</div>
+        <div class="stat-label">Favorite Placemat Grid</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-ai-winrate">33%</div>
+        <div class="stat-label">AI Dude Win Rate</div>
+      </div>
+    </div>
+
+    <!-- Feed Header -->
+    <div class="section-header">
+      <div class="section-title">
+        <span>📜</span> Recent Live Matches
+      </div>
+      <button class="refresh-btn" onclick="fetchMatches()">🔄 Refresh Live Feed</button>
+    </div>
+
+    <!-- Matches Container -->
+    <div class="matches-list" id="matches-container">
+      <div style="text-align: center; padding: 40px; color: var(--text-secondary);">Loading live match records...</div>
+    </div>
+  </main>
+
+  <!-- Interactive Board Modal -->
+  <div class="modal-backdrop" id="board-modal" onclick="closeModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div style="font-size: 12px; font-weight: 800; color: var(--accent); letter-spacing: 1px;">FINAL PLACEMAT REPLAY</div>
+      <h2 id="modal-match-title" style="margin-top: 4px; font-size: 22px;"></h2>
+      <p id="modal-match-sub" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;"></p>
+
+      <canvas id="board-canvas" class="modal-board-canvas" width="300" height="300"></canvas>
+
+      <div id="modal-scores-summary" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;"></div>
+    </div>
+  </div>
+
+  <footer>
+    BoxesBenBoxes • Pure pen-and-paper restaurant pass-and-play fun.
+  </footer>
+
+  <script>
+    let currentMatches = [];
+
+    async function fetchMatches() {
+      try {
+        const res = await fetch('/api/matches');
+        const data = await res.json();
+        currentMatches = data;
+        renderFeed(data);
+      } catch (err) {
+        console.error('Error fetching matches:', err);
+      }
+    }
+
+    function renderFeed(matches) {
+      const container = document.getElementById('matches-container');
+      if (!matches || matches.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No matches recorded yet. Finish a game in the app to see it here!</div>`;
+        return;
+      }
+
+      document.getElementById('stat-total-games').innerText = matches.length;
+
+      container.innerHTML = matches.map((m, idx) => {
+        const dateStr = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' + new Date(m.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const winnerText = m.isTie ? `🤝 Tied (${m.winnerNames.join(' & ')})` : `🏆 ${m.winnerNames[0]} Won`;
+
+        return `
+          <div class="match-card" onclick="openBoardReplay(${idx})">
+            <div class="match-top">
+              <div class="match-handle">
+                <span>🍽️</span> ${escapeHtml(m.handle)}
+                <span class="match-grid-badge">${m.gridRows}×${m.gridCols} Grid</span>
+              </div>
+              <div class="match-time">${dateStr}</div>
+            </div>
+            <div class="match-body">
+              <div class="players-list">
+                ${m.players.map(p => `
+                  <div class="player-pill">
+                    <div class="player-dot" style="background-color: ${p.color};"></div>
+                    <span class="player-name">${escapeHtml(p.name)}</span>
+                    <span class="player-score" style="color: ${p.color};">${p.score}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="winner-pill">${winnerText}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openBoardReplay(idx) {
+      const match = currentMatches[idx];
+      if (!match) return;
+
+      document.getElementById('modal-match-title').innerText = `${match.handle} Match`;
+      document.getElementById('modal-match-sub').innerText = `${match.gridRows}×${match.gridCols} Grid (${match.totalBoxes} Boxes)`;
+
+      // Render canvas
+      drawCompletedBoard(match);
+
+      // Render scores pills
+      document.getElementById('modal-scores-summary').innerHTML = match.players.map(p => `
+        <div class="player-pill" style="border-color: ${p.color};">
+          <span style="font-weight: 800; color: ${p.color};">${escapeHtml(p.name)}: ${p.score}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('board-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('board-modal').style.display = 'none';
+    }
+
+    function drawCompletedBoard(match) {
+      const canvas = document.getElementById('board-canvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const rows = match.gridRows;
+      const cols = match.gridCols;
+      const boxRows = rows - 1;
+      const boxCols = cols - 1;
+
+      const padding = 36;
+      const cellSize = Math.floor(Math.min((w - padding * 2) / boxCols, (h - padding * 2) / boxRows));
+      const boardW = boxCols * cellSize;
+      const boardH = boxRows * cellSize;
+      const startX = (w - boardW) / 2;
+      const startY = (h - boardH) / 2;
+
+      // Draw boxes & initials
+      const boxOwners = match.boardBoxes || '';
+      for (let r = 0; r < boxRows; r++) {
+        for (let c = 0; c < boxCols; c++) {
+          const char = boxOwners[r * boxCols + c];
+          const x = startX + c * cellSize;
+          const y = startY + r * cellSize;
+
+          if (char !== undefined && char !== '.') {
+            const pIdx = parseInt(char, 10);
+            const player = match.players[pIdx];
+            if (player) {
+              // Fill box with pastel tint
+              ctx.fillStyle = player.color + '22';
+              ctx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+
+              // Draw stamped circle
+              ctx.strokeStyle = player.color;
+              ctx.lineWidth = 1.5;
+              ctx.setLineDash([3, 3]);
+              ctx.beginPath();
+              ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize * 0.28, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.setLineDash([]);
+
+              // Draw initial
+              ctx.fillStyle = player.color;
+              ctx.font = 'bold 16px Nunito';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(player.initial, x + cellSize / 2, y + cellSize / 2);
+            }
+          }
+        }
+      }
+
+      // Draw lines between dots
+      ctx.strokeStyle = '#DCD5C3';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+
+      // Horizontal lines
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < boxCols; c++) {
+          ctx.beginPath();
+          ctx.moveTo(startX + c * cellSize, startY + r * cellSize);
+          ctx.lineTo(startX + (c + 1) * cellSize, startY + r * cellSize);
+          ctx.stroke();
+        }
+      }
+
+      // Vertical lines
+      for (let r = 0; r < boxRows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.beginPath();
+          ctx.moveTo(startX + c * cellSize, startY + r * cellSize);
+          ctx.lineTo(startX + c * cellSize, startY + (r + 1) * cellSize);
+          ctx.stroke();
+        }
+      }
+
+      // Draw Dots
+      ctx.fillStyle = '#2C261F';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.beginPath();
+          ctx.arc(startX + c * cellSize, startY + r * cellSize, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Initial load
+    fetchMatches();
+  </script>
+</body>
+</html>
