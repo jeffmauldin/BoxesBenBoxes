@@ -3,13 +3,19 @@ import { Platform } from 'react-native';
 /**
  * Google AdMob Configuration & Safety Manager
  * 
- * Includes Google's official sample/test ad unit IDs for safe testing.
- * When ready for production, replace with your real AdMob Ad Unit IDs
- * from your AdMob account (e.g. jamsoft68).
+ * Account: jeffmauldinsoftware@gmail.com
+ * App: BoxesBenBoxes (Android)
+ * App ID: ca-app-pub-4537394443614417~6765728644
+ * Publisher ID: pub-4537394443614417
  */
 
 export const ADMOB_CONFIG = {
-  // Official Google AdMob Test Ad Unit IDs
+  // Registered Google AdMob App & Publisher Information
+  publisherAccount: 'jeffmauldinsoftware@gmail.com',
+  publisherId: 'pub-4537394443614417',
+  appIdAndroid: 'ca-app-pub-4537394443614417~6765728644',
+
+  // Official Google AdMob Test Ad Unit IDs (used during development & Expo Go)
   testBannerId: Platform.select({
     android: 'ca-app-pub-3940256099942544/6300978111',
     ios: 'ca-app-pub-3940256099942544/2934735716',
@@ -21,7 +27,7 @@ export const ADMOB_CONFIG = {
     default: 'ca-app-pub-3940256099942544/1033173712',
   }),
 
-  // Insert your production AdMob unit IDs here before releasing to Play Store:
+  // Insert your production AdMob unit IDs here from your AdMob dashboard:
   prodBannerIdAndroid: '',
   prodInterstitialIdAndroid: '',
   prodBannerIdIOS: '',

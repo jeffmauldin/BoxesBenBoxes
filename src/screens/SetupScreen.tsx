@@ -213,7 +213,7 @@ let sessionDismissedComputerPrompt = false;
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.badgeLabel}>RESTAURANT PLACEMAT CLASSIC</Text>
-        <Text style={styles.title}>Boxes</Text>
+        <Text style={styles.title}>BoxesBenBoxes</Text>
         <Text style={styles.subtitle}>
           Connect dots, close squares, and claim your initials!
         </Text>

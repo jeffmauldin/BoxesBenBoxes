@@ -6,7 +6,7 @@ This document is written for AI agents and human developers who need to understa
 
 ## 🎯 Project Mission & Context
 
-- **App Name**: Boxes: Classic Dot Game (`com.jamsoft68.boxes`)
+- **App Name**: BoxesBenBoxes (`com.jeffmauldinsoftware.boxesbenboxes`)
 - **Origin & Vibe**: The timeless paper-and-pencil game played on restaurant placemats and kids' menus while waiting for food.
 - **Audience**: Kids, families, and thinkers of all ages. Focuses on spatial observation, concentration, and real human-to-human connection.
 - **Repository Location**: Dedicated standalone repository at `/workspaces/boxes-game`.

@@ -1,5 +1,6 @@
-# Google Play Store Publishing Guide for "Boxes"
-**Account:** `jamsoft68` | **Package Identifier:** `com.jamsoft68.boxes`
+# Google Play Store Publishing Guide for "BoxesBenBoxes"
+**Account:** `jeffmauldinsoftware@gmail.com` | **Package Identifier:** `com.jeffmauldinsoftware.boxesbenboxes`
+**AdMob App ID:** `ca-app-pub-4537394443614417~6765728644`
 
 This guide walks you through every step to build your production Android App Bundle (`.aab`) or direct installable test APK (`.apk`), set up your Google Play Console and AdMob accounts, and publish the app to the Google Play Store.
 
@@ -9,7 +10,7 @@ This guide walks you through every step to build your production Android App Bun
 Before submitting to the Play Store, you can generate an installable `.apk` file that your friends and family can download and install directly on their Android phones with a single link:
 
 1. Create a free account on [expo.dev](https://expo.dev) if you haven't already.
-2. In your terminal inside `boxes-app`, log in to Expo:
+2. In your terminal inside `boxes-game`, log in to Expo:
    ```bash
    npx eas login
    ```
@@ -27,11 +28,11 @@ Before submitting to the Play Store, you can generate an installable `.apk` file
 
 ## 2. Google Play Console Access & Developer Verification
 1. Navigate to [play.google.com/console](https://play.google.com/console).
-2. Log into the Google account associated with your registered developer name (`jamsoft68`).
-   - If your account was registered several years ago, your account is grandfathered and **does not** require the newer 20-tester requirement applied to personal accounts created after Nov 2023!
+2. Log into the Google account associated with your registered developer account (`jeffmauldinsoftware@gmail.com`).
+   - If your account was registered in 2018 or prior, your account is grandfathered and **does not** require the newer 20-tester requirement applied to personal accounts created after Nov 2023!
    - Ensure your developer email and phone verification are up to date under **Account details**.
 3. Click **"Create app"**:
-   - **App name:** `Boxes: Classic Dot Game`
+   - **App name:** `BoxesBenBoxes`
    - **Default language:** English (United States)
    - **App or game:** Game
    - **Free or paid:** Free
@@ -40,14 +41,11 @@ Before submitting to the Play Store, you can generate an installable `.apk` file
 ---
 
 ## 3. Linking Google AdMob for Monetization
-You mentioned having a Google Ads / AdMob login under `jamsoft68`.
+Your AdMob app **BoxesBenBoxes** is already registered under `jeffmauldinsoftware@gmail.com`!
 
-1. Go to [admob.google.com](https://admob.google.com) and log in.
-2. Click **Apps** → **Add App**:
-   - Platform: **Android**
-   - Is the app listed on a supported app store? Select **No** (until it is published).
-   - App name: `Boxes`
-3. Create two Ad Units:
+1. Go to [admob.google.com](https://admob.google.com) and log in with `jeffmauldinsoftware@gmail.com`.
+2. Locate **BoxesBenBoxes** (App ID: `ca-app-pub-4537394443614417~6765728644`).
+3. Under Ad Units, create:
    - **Ad Unit 1: Banner**
      - Type: Banner
      - Name: `Main Bottom Banner`

@@ -1,6 +1,6 @@
-# ✏️ Boxes: Classic Dot Game
+# ✏️ BoxesBenBoxes: Classic Restaurant Dot Game
 
-> The nostalgic pen-and-paper dot game played on restaurant placemats and kids' menus, beautifully crafted as a cross-platform mobile app for **Android** and **iOS** using React Native and Expo.
+> The nostalgic pen-and-paper dot game played on restaurant placemats and kids' menus, beautifully crafted as a cross-platform mobile app for **Android** and **iOS** using React Native and Expo. Named after playing with family.
 
 ---
 
@@ -8,7 +8,7 @@
 
 Remember waiting for food at a restaurant booth with your family, armed with crayons and a paper kids' menu or paper placemat? 
 
-**Boxes** (also known worldwide as *Dots & Boxes*, *Square-it*, or *Pigs in a Pen*) brings that pure pass-and-play experience to phones and tablets. No crumpled paper, no dull crayons, and no unevenly spaced dots!
+**BoxesBenBoxes** (inspired by the classic *Dots & Boxes*, *Square-it*, or *Pigs in a Pen*) brings that pure pass-and-play experience to phones and tablets. No crumpled paper, no dull crayons, and no unevenly spaced dots!
 
 ### ✨ Key Features
 - **Flexible Pass & Play (2–4 Players)**: Play human-to-human, human vs. computer, or mix multiple humans with a computer opponent in 3-player or 4-player games.

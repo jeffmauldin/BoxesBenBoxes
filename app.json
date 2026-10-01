@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Boxes - Classic Dot Game",
-    "slug": "boxes-classic-dots",
+    "name": "BoxesBenBoxes",
+    "slug": "boxesbenboxes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,10 +11,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jamsoft68.boxes"
+      "bundleIdentifier": "com.jeffmauldinsoftware.boxesbenboxes"
     },
     "android": {
-      "package": "com.jamsoft68.boxes",
+      "package": "com.jeffmauldinsoftware.boxesbenboxes",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FAF7EE",
@@ -26,6 +26,7 @@
         "android.permission.ACCESS_NETWORK_STATE"
       ]
     },
+
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
