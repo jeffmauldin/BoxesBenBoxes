@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
+    "eas-cli": "^24.10.0",
     "jest": "^30.5.2",
     "ts-jest": "^29.4.14",
     "typescript": "~6.0.3"
@@ -27,7 +28,9 @@
     "android": "ELECTRON_DISABLE_SANDBOX=1 expo start --android",
     "ios": "ELECTRON_DISABLE_SANDBOX=1 expo start --ios",
     "web": "ELECTRON_DISABLE_SANDBOX=1 expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "build:apk": "eas build -p android --profile preview",
+    "build:aab": "eas build -p android --profile production"
   },
   "private": true
 }
