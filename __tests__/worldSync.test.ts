@@ -3,6 +3,7 @@ import {
   loadDeviceProfile,
   saveDeviceProfile,
   submitGlobalMatchResult,
+  formatForFirestore,
 } from '../src/logic/worldSync';
 import { createInitialState, claimEdge } from '../src/logic/gameEngine';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,5 +71,22 @@ describe('worldSync - Global Match Serialization & Profile Management', () => {
 
     // Must resolve cleanly without throwing
     await expect(submitGlobalMatchResult(state)).resolves.not.toThrow();
+  });
+
+  test('formatForFirestore converts payload into typed Firestore document schema', () => {
+    const players = [
+      { id: 'p1', name: 'Ben', initial: 'B', color: '#1E88E5', isComputer: false },
+      { id: 'p2', name: 'Dad', initial: 'D', color: '#E53935', isComputer: false },
+    ];
+    let state = createInitialState(3, 3, players, false);
+    const profile = { deviceId: 'dev_123', handle: 'Ben & Dad', optOutGlobalSync: false };
+    const payload = serializeGameStateForWorld(state, profile);
+    const firestoreDoc = formatForFirestore(payload);
+
+    expect(firestoreDoc.fields.handle.stringValue).toBe('Ben & Dad');
+    expect(firestoreDoc.fields.deviceId.stringValue).toBe('dev_123');
+    expect(firestoreDoc.fields.gridRows.integerValue).toBe(3);
+    expect(firestoreDoc.fields.players.arrayValue.values).toHaveLength(2);
+    expect(firestoreDoc.fields.players.arrayValue.values[0].mapValue.fields.name.stringValue).toBe('Ben');
   });
 });

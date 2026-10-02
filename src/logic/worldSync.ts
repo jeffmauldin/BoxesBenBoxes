@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameState } from '../types/game';
 
 const PROFILE_STORAGE_KEY = '@boxes_device_profile_v1';
-const GLOBAL_SYNC_ENDPOINT = 'https://api.boxesbenboxes.com/api/matches'; // Target global cloud API
+export const GLOBAL_SYNC_ENDPOINT = 'https://firestore.googleapis.com/v1/projects/boxesbenboxes/databases/(default)/documents/matches';
+
 
 export interface DeviceProfile {
   deviceId: string;
@@ -134,6 +135,45 @@ export function serializeGameStateForWorld(
 }
 
 /**
+ * Convert CompactMatchPayload to Google Firestore REST typed document format
+ */
+export function formatForFirestore(payload: CompactMatchPayload) {
+  return {
+    fields: {
+      matchId: { stringValue: payload.matchId },
+      timestamp: { stringValue: payload.timestamp },
+      deviceId: { stringValue: payload.deviceId },
+      handle: { stringValue: payload.handle },
+      gridRows: { integerValue: payload.gridRows },
+      gridCols: { integerValue: payload.gridCols },
+      totalBoxes: { integerValue: payload.totalBoxes },
+      winnerNames: {
+        arrayValue: {
+          values: payload.winnerNames.map((name) => ({ stringValue: name })),
+        },
+      },
+      isTie: { booleanValue: payload.isTie },
+      boardBoxes: { stringValue: payload.boardBoxes },
+      players: {
+        arrayValue: {
+          values: payload.players.map((p) => ({
+            mapValue: {
+              fields: {
+                name: { stringValue: p.name },
+                initial: { stringValue: p.initial },
+                color: { stringValue: p.color },
+                score: { integerValue: p.score },
+                isComputer: { booleanValue: p.isComputer },
+              },
+            },
+          })),
+        },
+      },
+    },
+  };
+}
+
+/**
  * Fire-and-forget submission to the global match feed.
  * 
  * Rules:
@@ -154,18 +194,21 @@ export async function submitGlobalMatchResult(state: GameState): Promise<void> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-    fetch(GLOBAL_SYNC_ENDPOINT, {
+    const firestoreUrl = `${GLOBAL_SYNC_ENDPOINT}?documentId=${encodeURIComponent(payload.matchId)}`;
+    const firestoreBody = JSON.stringify(formatForFirestore(payload));
+
+    fetch(firestoreUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: firestoreBody,
       signal: controller.signal,
     })
       .then((res) => {
         clearTimeout(timeoutId);
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[WorldSync] Game outcome synced or endpoint acknowledged:', res.status);
+          console.log('[WorldSync] Game outcome synced to Firestore:', res.status);
         }
       })
       .catch((_err) => {
