@@ -6,9 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "backgroundColor": "#FAF7EE"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jeffmauldinsoftware.boxesbenboxes"
@@ -26,10 +23,18 @@
         "android.permission.ACCESS_NETWORK_STATE"
       ]
     },
-
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e33d58a0-09d6-4b01-a39e-c3b107409a04"
+      }
+    },
+    "owner": "jamsoft68",
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

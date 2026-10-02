@@ -6,6 +6,7 @@
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.26",
+    "expo-font": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -15,10 +16,9 @@
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "29.5.14",
     "@types/react": "~19.2.2",
-    "eas-cli": "^24.10.0",
-    "jest": "^30.5.2",
+    "jest": "~29.7.0",
     "ts-jest": "^29.4.14",
     "typescript": "~6.0.3"
   },
@@ -29,8 +29,8 @@
     "ios": "ELECTRON_DISABLE_SANDBOX=1 expo start --ios",
     "web": "ELECTRON_DISABLE_SANDBOX=1 expo start --web",
     "test": "jest",
-    "build:apk": "eas build -p android --profile preview",
-    "build:aab": "eas build -p android --profile production"
+    "build:apk": "npx --yes eas-cli build -p android --profile preview",
+    "build:aab": "npx --yes eas-cli build -p android --profile production"
   },
   "private": true
 }
