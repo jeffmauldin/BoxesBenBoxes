@@ -28,7 +28,7 @@ export const ADMOB_CONFIG = {
   }),
 
   // Insert your production AdMob unit IDs here from your AdMob dashboard:
-  prodBannerIdAndroid: '',
+  prodBannerIdAndroid: 'ca-app-pub-4537394443614417/9964512085',
   prodInterstitialIdAndroid: '',
   prodBannerIdIOS: '',
   prodInterstitialIdIOS: '',
