@@ -176,6 +176,33 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
     difficulty: ComputerDifficulty;
   } | null>(null);
 
+  const handlePlayerNameFocus = (index: number) => {
+    const defaultName = `Player ${index + 1}`;
+    if (players[index].name.trim().toLowerCase() === defaultName.toLowerCase()) {
+      handlePlayerNameChange(index, '');
+    }
+  };
+
+  const handlePlayerNameBlur = (index: number) => {
+    if (players[index].name.trim() === '') {
+      handlePlayerNameChange(index, `Player ${index + 1}`);
+    }
+  };
+
+  const handlePlayerInitialFocus = (index: number) => {
+    if (players[index].initial === `${index + 1}`) {
+      handlePlayerInitialChange(index, '');
+    }
+  };
+
+  const handlePlayerInitialBlur = (index: number) => {
+    if (players[index].initial.trim() === '') {
+      const name = players[index].name.trim();
+      const fallbackInitial = name.length > 0 ? name[0].toUpperCase() : `${index + 1}`;
+      handlePlayerInitialChange(index, fallbackInitial);
+    }
+  };
+
   const handlePlayerNameChange = (index: number, newName: string) => {
     setPlayers((prev) => {
       const updated = [...prev];
@@ -486,9 +513,12 @@ let sessionDismissedComputerPrompt = false;
                     style={styles.nameTextInput}
                     value={player.name}
                     editable={!player.isComputer}
+                    onFocus={() => handlePlayerNameFocus(idx)}
+                    onBlur={() => handlePlayerNameBlur(idx)}
                     onChangeText={(text) => handlePlayerNameChange(idx, text)}
                     placeholder={`Player ${idx + 1}`}
                     placeholderTextColor={THEME.textMuted}
+                    selectTextOnFocus={true}
                   />
                 </View>
                 <View style={styles.inputColInitial}>
@@ -498,9 +528,12 @@ let sessionDismissedComputerPrompt = false;
                     value={player.initial}
                     maxLength={2}
                     editable={!player.isComputer}
+                    onFocus={() => handlePlayerInitialFocus(idx)}
+                    onBlur={() => handlePlayerInitialBlur(idx)}
                     onChangeText={(text) => handlePlayerInitialChange(idx, text)}
                     placeholder={`${idx + 1}`}
                     placeholderTextColor={THEME.textMuted}
+                    selectTextOnFocus={true}
                   />
                 </View>
               </View>
