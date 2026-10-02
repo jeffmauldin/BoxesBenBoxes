@@ -21,6 +21,7 @@ interface ActiveGameConfig {
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('setup');
   const [activeGame, setActiveGame] = useState<ActiveGameConfig | null>(null);
+  const [lastSetup, setLastSetup] = useState<ActiveGameConfig | null>(null);
 
   const handleStartGame = (
     rows: number,
@@ -28,7 +29,9 @@ export default function App() {
     players: Omit<Player, 'score'>[],
     allowUndo: boolean
   ) => {
-    setActiveGame({ rows, cols, players, allowUndo });
+    const config = { rows, cols, players, allowUndo };
+    setActiveGame(config);
+    setLastSetup(config);
     setCurrentScreen('game');
   };
 
@@ -55,6 +58,7 @@ export default function App() {
               <SetupScreen
                 onStartGame={handleStartGame}
                 onOpenHistory={handleOpenHistory}
+                lastSetup={lastSetup}
               />
               <AdBanner testMode={true} />
             </>

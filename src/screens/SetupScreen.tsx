@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,23 @@ import {
   TouchableOpacity,
   Switch,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_PLAYER_PALETTES, GAME_PRESETS } from '../constants/presets';
 import { THEME } from '../constants/theme';
 import { ComputerDifficulty, Player } from '../types/game';
 import { loadDeviceProfile, saveDeviceProfile } from '../logic/worldSync';
+
+export interface SavedSetupConfig {
+  rows?: number;
+  cols?: number;
+  players?: Omit<Player, 'score'>[];
+  numPlayers?: number;
+  allowUndo?: boolean;
+  selectedPresetId?: string;
+}
 
 interface SetupScreenProps {
   onStartGame: (
@@ -22,7 +34,10 @@ interface SetupScreenProps {
     allowUndo: boolean
   ) => void;
   onOpenHistory: () => void;
+  lastSetup?: SavedSetupConfig | null;
 }
+
+const SETUP_STORAGE_KEY = '@boxes_saved_setup_v2';
 
 interface PlayerSetupState {
   id: string;
@@ -33,36 +48,8 @@ interface PlayerSetupState {
   computerDifficulty: ComputerDifficulty;
 }
 
-const COMPUTER_TYPES: { id: ComputerDifficulty; label: string; initial: string; desc: string }[] = [
-  { id: 'random', label: 'Random Dude 🎲', initial: 'RD', desc: 'Makes completely random legal moves' },
-  { id: 'sees_boxes', label: 'Sees Boxes Dude 👀', initial: 'SB', desc: 'Finishes any completable box, else moves randomly' },
-  { id: 'crafty', label: 'Somewhat Crafty 🦊', initial: 'CD', desc: 'Finishes boxes and avoids giving you an easy box' },
-  { id: 'minimizer', label: 'Minimizer Dude 🧠', initial: 'MD', desc: 'When forced to give a box, chooses to give the fewest' },
-];
-
-export const SetupScreen: React.FC<SetupScreenProps> = ({
-  onStartGame,
-  onOpenHistory,
-}) => {
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('classic');
-  const [customRows, setCustomRows] = useState<number>(4);
-  const [customCols, setCustomCols] = useState<number>(4);
-  const [numPlayers, setNumPlayers] = useState<number>(2);
-  const [allowUndo, setAllowUndo] = useState<boolean>(false);
-  const [playerHandle, setPlayerHandle] = useState<string>('');
-
-  useEffect(() => {
-    loadDeviceProfile().then((profile) => {
-      setPlayerHandle(profile.handle);
-    });
-  }, []);
-
-  const handleUpdateHandle = (newHandle: string) => {
-    setPlayerHandle(newHandle);
-    saveDeviceProfile({ handle: newHandle.trim() || undefined });
-  };
-
-  const [players, setPlayers] = useState<PlayerSetupState[]>([
+function buildInitialPlayers(lastPlayers?: Omit<Player, 'score'>[] | null): PlayerSetupState[] {
+  const defaultPlayers: PlayerSetupState[] = [
     {
       id: 'p1',
       name: 'Player 1',
@@ -95,7 +82,93 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
       isComputer: false,
       computerDifficulty: 'random',
     },
-  ]);
+  ];
+
+  if (!lastPlayers || lastPlayers.length === 0) {
+    return defaultPlayers;
+  }
+
+  return defaultPlayers.map((def, idx) => {
+    const existing = lastPlayers[idx];
+    if (existing) {
+      return {
+        id: existing.id || def.id,
+        name: existing.name || def.name,
+        initial: existing.initial || def.initial,
+        color: existing.color || def.color,
+        isComputer: Boolean(existing.isComputer),
+        computerDifficulty: existing.computerDifficulty || def.computerDifficulty,
+      };
+    }
+    return def;
+  });
+}
+
+const COMPUTER_TYPES: { id: ComputerDifficulty; label: string; initial: string; desc: string }[] = [
+  { id: 'random', label: 'Random Dude 🎲', initial: 'RD', desc: 'Makes completely random legal moves' },
+  { id: 'sees_boxes', label: 'Sees Boxes Dude 👀', initial: 'SB', desc: 'Finishes any completable box, else moves randomly' },
+  { id: 'crafty', label: 'Somewhat Crafty 🦊', initial: 'CD', desc: 'Finishes boxes and avoids giving you an easy box' },
+  { id: 'minimizer', label: 'Minimizer Dude 🧠', initial: 'MD', desc: 'When forced to give a box, chooses to give the fewest' },
+];
+
+export const SetupScreen: React.FC<SetupScreenProps> = ({
+  onStartGame,
+  onOpenHistory,
+  lastSetup,
+}) => {
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const [selectedPresetId, setSelectedPresetId] = useState<string>(() => {
+    if (lastSetup?.rows && lastSetup?.cols) {
+      const match = GAME_PRESETS.find(
+        (p) => p.rows === lastSetup.rows && p.cols === lastSetup.cols
+      );
+      return match ? match.id : 'custom';
+    }
+    return 'classic';
+  });
+
+  const [customRows, setCustomRows] = useState<number>(() => lastSetup?.rows || 4);
+  const [customCols, setCustomCols] = useState<number>(() => lastSetup?.cols || 4);
+  const [numPlayers, setNumPlayers] = useState<number>(() =>
+    lastSetup?.players?.length ? Math.min(4, Math.max(2, lastSetup.players.length)) : 2
+  );
+  const [allowUndo, setAllowUndo] = useState<boolean>(() => Boolean(lastSetup?.allowUndo));
+  const [playerHandle, setPlayerHandle] = useState<string>('');
+
+  const [players, setPlayers] = useState<PlayerSetupState[]>(() =>
+    buildInitialPlayers(lastSetup?.players)
+  );
+
+  useEffect(() => {
+    loadDeviceProfile().then((profile) => {
+      setPlayerHandle(profile.handle);
+    });
+
+    if (!lastSetup) {
+      AsyncStorage.getItem(SETUP_STORAGE_KEY)
+        .then((raw) => {
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved.players && Array.isArray(saved.players) && saved.players.length > 0) {
+              setPlayers(saved.players);
+            }
+            if (saved.numPlayers) setNumPlayers(saved.numPlayers);
+            if (saved.selectedPresetId) setSelectedPresetId(saved.selectedPresetId);
+            if (saved.customRows) setCustomRows(saved.customRows);
+            if (saved.customCols) setCustomCols(saved.customCols);
+            if (typeof saved.allowUndo === 'boolean') setAllowUndo(saved.allowUndo);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [lastSetup]);
+
+  const handleUpdateHandle = (newHandle: string) => {
+    setPlayerHandle(newHandle);
+    saveDeviceProfile({ handle: newHandle.trim() || undefined });
+  };
+
 
   // Anti-computer modal state
   const [pendingComputerChange, setPendingComputerChange] = useState<{
@@ -214,23 +287,52 @@ let sessionDismissedComputerPrompt = false;
       computerDifficulty: p.computerDifficulty,
     }));
 
+    // Save setup to AsyncStorage
+    const setupToSave = {
+      players,
+      numPlayers,
+      selectedPresetId,
+      customRows,
+      customCols,
+      allowUndo,
+    };
+    AsyncStorage.setItem(SETUP_STORAGE_KEY, JSON.stringify(setupToSave)).catch(() => {});
+
     onStartGame(rows, cols, activePlayers, allowUndo);
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView
+      style={styles.screenWrapper}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.badgeLabel}>RESTAURANT PLACEMAT CLASSIC</Text>
-        <Text style={styles.title}>BoxesBenBoxes</Text>
-        <Text style={styles.subtitle}>
-          Connect dots, close squares, and claim your initials!
-        </Text>
-      </View>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTopRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.badgeLabel}>RESTAURANT PLACEMAT CLASSIC</Text>
+              <Text style={styles.title}>BoxesBenBoxes</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.headerHistoryBtn}
+              activeOpacity={0.7}
+              onPress={onOpenHistory}
+            >
+              <Text style={styles.headerHistoryBtnText}>📜 Records</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.subtitle}>
+            Connect dots, close squares, and claim your initials!
+          </Text>
+        </View>
 
       {/* 1. Grid Size Presets */}
       <View style={styles.sectionCard}>
@@ -473,85 +575,100 @@ let sessionDismissedComputerPrompt = false;
 
         <View style={styles.optionDivider} />
 
-        <View style={styles.optionRow}>
-          <View style={styles.optionTextContainer}>
+        <View style={styles.handleSection}>
+          <View style={styles.handleHeaderRow}>
             <Text style={styles.optionTitle}>Public / Family Handle</Text>
-            <Text style={styles.optionSubtitle}>
-              Your display name for the world match feed.
-            </Text>
+            <Text style={styles.handleBadge}>Live Cloud Sync</Text>
           </View>
+          <Text style={styles.optionSubtitle}>
+            Your display name shown on the world match feed website.
+          </Text>
           <TextInput
-            style={styles.handleInput}
+            style={styles.handleInputField}
             value={playerHandle}
             onChangeText={handleUpdateHandle}
+            onFocus={() => {
+              setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }, 200);
+            }}
             placeholder="e.g. Ben & Dad"
             placeholderTextColor={THEME.textMuted}
             maxLength={22}
             autoCorrect={false}
+            returnKeyType="done"
           />
         </View>
-      </View>
 
-      {/* Start Game & History Buttons */}
-      <View style={styles.actionButtonGroup}>
-        <TouchableOpacity
-          style={styles.startButton}
-          activeOpacity={0.8}
-          onPress={handleStart}
-        >
-          <Text style={styles.startButtonText}>✏ Start Game</Text>
-        </TouchableOpacity>
+        <View style={styles.optionDivider} />
 
         <TouchableOpacity
-          style={styles.historyButton}
+          style={styles.historyOptionRow}
           activeOpacity={0.7}
           onPress={onOpenHistory}
         >
-          <Text style={styles.historyButtonText}>📜 Past Game Records</Text>
+          <Text style={styles.historyOptionText}>📜 View Past Game Records</Text>
+          <Text style={styles.historyOptionArrow}>→</Text>
         </TouchableOpacity>
       </View>
+    </ScrollView>
 
-      {/* Anti-Computer Opponent Dialog */}
-      <Modal
-        visible={Boolean(pendingComputerChange)}
-        transparent
-        animationType="fade"
-        onRequestClose={cancelComputerSelection}
+    {/* Sticky Bottom Bar with Start Button */}
+    <View style={styles.bottomBar}>
+      <TouchableOpacity
+        style={styles.startButton}
+        activeOpacity={0.8}
+        onPress={handleStart}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalIcon}>👫</Text>
-            <Text style={styles.modalTitle}>Play a Real Person?</Text>
-            <Text style={styles.modalMessage}>
-              Are you sure you want to play the computer? It's much more fun to play with a person right next to you!
-            </Text>
-            <View style={styles.modalActionGroup}>
-              <TouchableOpacity
-                style={styles.modalConfirmBtn}
-                onPress={cancelComputerSelection}
-              >
-                <Text style={styles.modalConfirmBtnText}>
-                  You're right, let's play a person!
-                </Text>
-              </TouchableOpacity>
+        <Text style={styles.startButtonText}>✏ Start Game</Text>
+      </TouchableOpacity>
+    </View>
 
-              <TouchableOpacity
-                style={styles.modalProceedBtn}
-                onPress={confirmComputerSelection}
-              >
-                <Text style={styles.modalProceedBtnText}>
-                  Play computer anyway
-                </Text>
-              </TouchableOpacity>
-            </View>
+    {/* Anti-Computer Opponent Dialog */}
+    <Modal
+      visible={Boolean(pendingComputerChange)}
+      transparent
+      animationType="fade"
+      onRequestClose={cancelComputerSelection}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalIcon}>👫</Text>
+          <Text style={styles.modalTitle}>Play a Real Person?</Text>
+          <Text style={styles.modalMessage}>
+            Are you sure you want to play the computer? It's much more fun to play with a person right next to you!
+          </Text>
+          <View style={styles.modalActionGroup}>
+            <TouchableOpacity
+              style={styles.modalConfirmBtn}
+              onPress={cancelComputerSelection}
+            >
+              <Text style={styles.modalConfirmBtnText}>
+                You're right, let's play a person!
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalProceedBtn}
+              onPress={confirmComputerSelection}
+            >
+              <Text style={styles.modalProceedBtnText}>
+                Play computer anyway
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </Modal>
-    </ScrollView>
-  );
+      </View>
+    </Modal>
+  </KeyboardAvoidingView>
+);
 };
 
 const styles = StyleSheet.create({
+  screenWrapper: {
+    flex: 1,
+    backgroundColor: THEME.paperBackground,
+  },
   container: {
     flex: 1,
     backgroundColor: THEME.paperBackground,
@@ -559,11 +676,31 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 28,
+    paddingBottom: 120,
   },
   header: {
     alignItems: 'center',
     marginBottom: 20,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 4,
+  },
+  headerHistoryBtn: {
+    backgroundColor: '#EFE8D8',
+    borderWidth: 1.5,
+    borderColor: '#DCD4C0',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  headerHistoryBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: THEME.textPrimary,
   },
   badgeLabel: {
     fontSize: 10,
@@ -806,22 +943,63 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.paperBorder,
     marginVertical: 10,
   },
-  handleInput: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: THEME.paperBorder,
+  handleSection: {
+    marginTop: 4,
+  },
+  handleHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  handleBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: THEME.accent,
+    backgroundColor: '#FDEEE9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  },
+  handleInputField: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: THEME.paperBorder,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    fontWeight: '700',
+    color: THEME.textPrimary,
+    marginTop: 8,
+  },
+  historyOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  historyOptionText: {
     fontSize: 13,
     fontWeight: '700',
     color: THEME.textPrimary,
-    minWidth: 130,
-    textAlign: 'right',
   },
-  actionButtonGroup: {
-    gap: 10,
-    marginTop: 6,
+  historyOptionArrow: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: THEME.textMuted,
+  },
+  bottomBar: {
+    backgroundColor: '#FAF5E8',
+    borderTopWidth: 2,
+    borderTopColor: THEME.paperBorder,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 10,
   },
   startButton: {
     backgroundColor: THEME.accent,
