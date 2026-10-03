@@ -70,9 +70,13 @@ Remember waiting for food at a restaurant booth with your family, armed with cra
 
 The project includes pre-configured **EAS (Expo Application Services)** build profiles in [`eas.json`](file:///workspaces/boxes-game/eas.json):
 
+- **Verified Standalone APK**: [Download BoxesBenBoxes v1.0.0 APK](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes/builds/cf1f0bec-e33e-4eee-b338-9c9d17c87193) (Direct installation on any Android phone)
+- **Expo Cloud Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
+
+To trigger new builds:
 ```bash
-# 1. Log in to your free Expo account
-npx eas login
+# 1. Log in to your Expo account (CLI-based, container safe)
+npx eas login --no-browser
 
 # 2. Build a standalone installable .apk (for direct phone install & sideloading):
 npm run build:apk
@@ -81,7 +85,7 @@ npm run build:apk
 npm run build:aab
 ```
 
-EAS builds the application in the cloud and provides a direct download link when complete.
+EAS builds the application in the cloud and provides a direct download link and QR code when complete.
 
 ---
 

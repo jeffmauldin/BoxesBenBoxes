@@ -155,11 +155,16 @@ npm run tunnel
 npm run web
 
 # 5. Build standalone installable Android .apk (EAS Build)
+# Note: Use `npx eas login --no-browser` if authenticating inside a dev container
 npm run build:apk
 
 # 6. Build Google Play Store release .aab (EAS Build)
 npm run build:aab
 ```
+
+### Verified Cloud Builds:
+- **Standalone Android APK v1.0.0**: [Download APK Build `cf1f0bec`](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes/builds/cf1f0bec-e33e-4eee-b338-9c9d17c87193)
+- **Expo Project Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
 
 When making changes to this repo:
 - Always run `npx tsc --noEmit` and `npm test` before committing.
