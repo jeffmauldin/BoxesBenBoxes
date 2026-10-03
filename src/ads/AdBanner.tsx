@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { THEME } from '../constants/theme';
-import { adManager } from './adManager';
+import { adManager, BannerAd, BannerAdSize } from './adManager';
 
 interface AdBannerProps {
   testMode?: boolean;
@@ -17,6 +17,8 @@ const PLACEMAT_TIPS = [
 
 export const AdBanner: React.FC<AdBannerProps> = ({ testMode = true }) => {
   const [tipIndex, setTipIndex] = useState(0);
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [adFailed, setAdFailed] = useState(false);
 
   // Rotate tips occasionally
   useEffect(() => {
@@ -27,17 +29,45 @@ export const AdBanner: React.FC<AdBannerProps> = ({ testMode = true }) => {
   }, []);
 
   const adUnitId = adManager.getBannerUnitId();
+  const canShowBanner = Boolean(
+    BannerAd &&
+    BannerAdSize &&
+    !adFailed &&
+    (Platform.OS === 'android' || Platform.OS === 'ios')
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.adPlaceholder}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>PLACEMAT TIP</Text>
+      {canShowBanner ? (
+        <View style={[styles.bannerWrapper, !adLoaded && styles.hiddenBanner]}>
+          <BannerAd
+            unitId={adUnitId}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: true,
+            }}
+            onAdLoaded={() => {
+              setAdLoaded(true);
+              setAdFailed(false);
+            }}
+            onAdFailedToLoad={(error: any) => {
+              console.log('[AdMob] Banner load failed, displaying placemat tips:', error?.message);
+              setAdFailed(true);
+            }}
+          />
         </View>
-        <Text numberOfLines={1} style={styles.subText}>
-          {PLACEMAT_TIPS[tipIndex]}
-        </Text>
-      </View>
+      ) : null}
+
+      {(!canShowBanner || !adLoaded) && (
+        <View style={styles.adPlaceholder}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>PLACEMAT TIP</Text>
+          </View>
+          <Text numberOfLines={1} style={styles.subText}>
+            {PLACEMAT_TIPS[tipIndex]}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -52,37 +82,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
   },
+  bannerWrapper: {
+    width: 320,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hiddenBanner: {
+    opacity: 0,
+    position: 'absolute',
+  },
   adPlaceholder: {
     width: '100%',
     maxWidth: 380,
     height: 38,
     backgroundColor: '#FAF7EE',
     borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#D4CBB6',
+    borderColor: '#E2DCB8',
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    gap: 8,
+    paddingHorizontal: 10,
   },
   badge: {
-    backgroundColor: '#EAE1CE',
+    backgroundColor: '#E8E0C5',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
+    marginRight: 8,
   },
   badgeText: {
     fontSize: 9,
     fontWeight: '800',
-    color: '#706456',
-    letterSpacing: 0.6,
+    color: '#8A7A56',
+    letterSpacing: 0.5,
   },
   subText: {
     flex: 1,
-    fontSize: 11,
-    color: '#6E6254',
+    fontSize: 12,
+    color: THEME.textMuted,
     fontStyle: 'italic',
-    fontWeight: '500',
   },
 });

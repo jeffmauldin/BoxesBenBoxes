@@ -9,40 +9,56 @@ import { Platform } from 'react-native';
  * Publisher ID: pub-4537394443614417
  */
 
+// Safely resolve native Google Mobile Ads modules across Native, Web, and Jest
+let MobileAds: any = null;
+let InterstitialAd: any = null;
+let AdEventType: any = null;
+let TestIds: any = null;
+let MaxAdContentRating: any = null;
+let BannerAd: any = null;
+let BannerAdSize: any = null;
+
+try {
+  if (Platform.OS === 'android' || Platform.OS === 'ios') {
+    const gma = require('react-native-google-mobile-ads');
+    MobileAds = gma.default || gma.MobileAds;
+    InterstitialAd = gma.InterstitialAd;
+    AdEventType = gma.AdEventType;
+    TestIds = gma.TestIds;
+    MaxAdContentRating = gma.MaxAdContentRating;
+    BannerAd = gma.BannerAd;
+    BannerAdSize = gma.BannerAdSize;
+  }
+} catch (e) {
+  // Graceful fallback for Web, Expo Go, and Jest test environments
+}
+
+export { BannerAd, BannerAdSize };
+
 export const ADMOB_CONFIG = {
   // Registered Google AdMob App & Publisher Information
   publisherAccount: 'jeffmauldinsoftware@gmail.com',
   publisherId: 'pub-4537394443614417',
   appIdAndroid: 'ca-app-pub-4537394443614417~6765728644',
 
-  // Official Google AdMob Test Ad Unit IDs (used during development & Expo Go)
-  testBannerId: Platform.select({
-    android: 'ca-app-pub-3940256099942544/6300978111',
-    ios: 'ca-app-pub-3940256099942544/2934735716',
-    default: 'ca-app-pub-3940256099942544/6300978111',
-  }),
-  testInterstitialId: Platform.select({
-    android: 'ca-app-pub-3940256099942544/1033173712',
-    ios: 'ca-app-pub-3940256099942544/4411468910',
-    default: 'ca-app-pub-3940256099942544/1033173712',
-  }),
+  // Official Google AdMob Test Ad Unit IDs (verified Google sample ads)
+  testBannerId: 'ca-app-pub-3940256099942544/6300978111',
+  testInterstitialId: 'ca-app-pub-3940256099942544/1033173712',
 
-  // Insert your production AdMob unit IDs here from your AdMob dashboard:
+  // Production Ad Unit IDs:
+  // Using test IDs until user creates the dedicated Interstitial in AdMob
   prodBannerIdAndroid: 'ca-app-pub-4537394443614417/9964512085',
   prodInterstitialIdAndroid: '',
-  prodBannerIdIOS: '',
-  prodInterstitialIdIOS: '',
 
   // User experience rules:
-  // Show interstitial at most once every N games
+  // Show interstitial at most once every 2 completed games
   gamesBetweenInterstitials: 2,
-  // Minimum time between interstitials (in ms): 120 seconds
-  cooldownMs: 120 * 1000,
+  // 60-second cooldown between interstitials to respect player flow
+  cooldownMs: 60 * 1000,
 
   // COPPA & Google Play Families Kid-Safety Enforcement:
-  // Explicitly filters out alcohol, gambling, mature, or unrated ads
   tagForChildDirectedTreatment: true,
-  maxAdContentRating: 'G', // G: General audiences only
+  maxAdContentRating: 'G',
   tagForUnderAgeOfConsent: true,
   nonPersonalizedAdsOnly: true,
 };
@@ -50,16 +66,77 @@ export const ADMOB_CONFIG = {
 class AdManager {
   private gamesCompletedCount = 0;
   private lastInterstitialTimestamp = 0;
+  private interstitialInstance: any = null;
+  private isLoaded = false;
+  private isInitialized = false;
+
+  constructor() {
+    this.initialize();
+  }
+
+  public async initialize(): Promise<void> {
+    if (this.isInitialized || !MobileAds) return;
+    this.isInitialized = true;
+
+    try {
+      if (typeof MobileAds === 'function') {
+        const ads = MobileAds();
+        if (ads?.setRequestConfiguration) {
+          await ads.setRequestConfiguration({
+            maxAdContentRating: MaxAdContentRating?.G,
+            tagForChildDirectedTreatment: true,
+            tagForUnderAgeOfConsent: true,
+          });
+        }
+        if (ads?.initialize) {
+          await ads.initialize();
+        }
+      }
+      this.loadInterstitial();
+    } catch (err) {
+      console.warn('[AdMob] Initialization warning:', err);
+    }
+  }
 
   public getBannerUnitId(): string {
     const isProd = !__DEV__;
     if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodBannerIdAndroid) {
       return ADMOB_CONFIG.prodBannerIdAndroid;
     }
-    if (isProd && Platform.OS === 'ios' && ADMOB_CONFIG.prodBannerIdIOS) {
-      return ADMOB_CONFIG.prodBannerIdIOS;
+    return TestIds?.BANNER || ADMOB_CONFIG.testBannerId;
+  }
+
+  public getInterstitialUnitId(): string {
+    const isProd = !__DEV__;
+    if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodInterstitialIdAndroid) {
+      return ADMOB_CONFIG.prodInterstitialIdAndroid;
     }
-    return ADMOB_CONFIG.testBannerId;
+    return TestIds?.INTERSTITIAL || ADMOB_CONFIG.testInterstitialId;
+  }
+
+  private loadInterstitial(): void {
+    if (!InterstitialAd) return;
+
+    try {
+      const adUnitId = this.getInterstitialUnitId();
+      this.interstitialInstance = InterstitialAd.createForAdRequest(adUnitId, {
+        requestNonPersonalizedAdsOnly: true,
+        keywords: ['puzzle', 'family', 'board game', 'casual'],
+      });
+
+      this.interstitialInstance.addAdEventListener(AdEventType.LOADED, () => {
+        this.isLoaded = true;
+      });
+
+      this.interstitialInstance.addAdEventListener(AdEventType.ERROR, (err: any) => {
+        this.isLoaded = false;
+        console.warn('[AdMob] Interstitial load error:', err);
+      });
+
+      this.interstitialInstance.load();
+    } catch (e) {
+      console.warn('[AdMob] Failed to create interstitial:', e);
+    }
   }
 
   public shouldShowInterstitial(): boolean {
@@ -73,8 +150,54 @@ class AdManager {
     return isFrequencyMet && isCooldownMet;
   }
 
+  public showInterstitialIfEligible(onDone?: () => void): void {
+    const finish = () => {
+      if (onDone) onDone();
+    };
+
+    if (!this.shouldShowInterstitial()) {
+      finish();
+      return;
+    }
+
+    if (this.isLoaded && this.interstitialInstance) {
+      try {
+        const unsubscribeClosed = this.interstitialInstance.addAdEventListener(
+          AdEventType.CLOSED,
+          () => {
+            this.lastInterstitialTimestamp = Date.now();
+            this.isLoaded = false;
+            unsubscribeClosed();
+            this.loadInterstitial(); // Pre-load next ad
+            finish();
+          }
+        );
+
+        this.interstitialInstance.show().catch((err: any) => {
+          console.warn('[AdMob] Show error:', err);
+          this.isLoaded = false;
+          this.loadInterstitial();
+          finish();
+        });
+      } catch (err) {
+        console.warn('[AdMob] Show failed:', err);
+        finish();
+      }
+    } else {
+      // Ad was not ready yet - continue without blocking user
+      if (!this.isLoaded) {
+        this.loadInterstitial();
+      }
+      finish();
+    }
+  }
+
   public recordInterstitialShown(): void {
     this.lastInterstitialTimestamp = Date.now();
+  }
+
+  public isInterstitialReady(): boolean {
+    return this.isLoaded;
   }
 
   public resetCounters(): void {

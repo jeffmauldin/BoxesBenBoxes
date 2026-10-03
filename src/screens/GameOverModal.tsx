@@ -29,10 +29,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      if (adManager.shouldShowInterstitial()) {
-        console.log('[AdMob] Interstitial eligible - would show Google AdMob interstitial here (max 15s)');
-        adManager.recordInterstitialShown();
-      }
+      adManager.showInterstitialIfEligible();
     }
   }, [visible]);
 
