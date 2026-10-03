@@ -163,7 +163,7 @@ npm run build:aab
 ```
 
 ### Verified Cloud Builds:
-- **Standalone Android APK v1.0.0**: [Download APK Build `cf1f0bec`](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes/builds/cf1f0bec-e33e-4eee-b338-9c9d17c87193)
+- **Standalone Android APK v1.0.0 (Google Ads Integrated)**: [Download APK Build `f0b5fc13`](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes/builds/f0b5fc13-054e-4dc3-afe8-266e544265f9)
 - **Expo Project Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
 
 When making changes to this repo:
