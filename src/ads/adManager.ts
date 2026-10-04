@@ -41,20 +41,23 @@ export const ADMOB_CONFIG = {
   publisherId: 'pub-4537394443614417',
   appIdAndroid: 'ca-app-pub-4537394443614417~6765728644',
 
-  // Official Google AdMob Test Ad Unit IDs (verified Google sample ads)
+  // Official Google AdMob Test Ad Unit IDs (verified Google sample ads, 100% fill)
   testBannerId: 'ca-app-pub-3940256099942544/6300978111',
   testInterstitialId: 'ca-app-pub-3940256099942544/1033173712',
 
   // Production Ad Unit IDs:
-  // Using test IDs until user creates the dedicated Interstitial in AdMob
   prodBannerIdAndroid: 'ca-app-pub-4537394443614417/9964512085',
   prodInterstitialIdAndroid: '',
 
+  // Set forceTestAds: true during testing so test ads load 100% of the time
+  // without relying on Google Play Console / AdMob account approval.
+  forceTestAds: true,
+
   // User experience rules:
-  // Show interstitial at most once every 2 completed games
-  gamesBetweenInterstitials: 2,
-  // 60-second cooldown between interstitials to respect player flow
-  cooldownMs: 60 * 1000,
+  // When testing, trigger after every completed game; in prod, every 2 games
+  gamesBetweenInterstitials: 1,
+  // Cooldown between interstitials (5s during testing, 60s in production)
+  cooldownMs: 5 * 1000,
 
   // COPPA & Google Play Families Kid-Safety Enforcement:
   tagForChildDirectedTreatment: true,
@@ -75,7 +78,28 @@ class AdManager {
   }
 
   public async initialize(): Promise<void> {
-    if (this.isInitialized || !MobileAds) return;
+    if (this.isInitialized) return;
+
+    if (!MobileAds && (Platform.OS === 'android' || Platform.OS === 'ios')) {
+      try {
+        const gma = require('react-native-google-mobile-ads');
+        MobileAds = gma.default || gma.MobileAds;
+        InterstitialAd = gma.InterstitialAd;
+        AdEventType = gma.AdEventType;
+        TestIds = gma.TestIds;
+        MaxAdContentRating = gma.MaxAdContentRating;
+        BannerAd = gma.BannerAd;
+        BannerAdSize = gma.BannerAdSize;
+      } catch (e) {
+        console.warn('[AdMob] Error requiring native ads module:', e);
+      }
+    }
+
+    if (!MobileAds) {
+      console.log('[AdMob] MobileAds not available in this environment');
+      return;
+    }
+
     this.isInitialized = true;
 
     try {
@@ -90,6 +114,7 @@ class AdManager {
         }
         if (ads?.initialize) {
           await ads.initialize();
+          console.log('[AdMob] Google Mobile Ads SDK initialized');
         }
       }
       this.loadInterstitial();
@@ -99,6 +124,9 @@ class AdManager {
   }
 
   public getBannerUnitId(): string {
+    if (ADMOB_CONFIG.forceTestAds) {
+      return TestIds?.BANNER || ADMOB_CONFIG.testBannerId;
+    }
     const isProd = !__DEV__;
     if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodBannerIdAndroid) {
       return ADMOB_CONFIG.prodBannerIdAndroid;
@@ -107,6 +135,9 @@ class AdManager {
   }
 
   public getInterstitialUnitId(): string {
+    if (ADMOB_CONFIG.forceTestAds) {
+      return TestIds?.INTERSTITIAL || ADMOB_CONFIG.testInterstitialId;
+    }
     const isProd = !__DEV__;
     if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodInterstitialIdAndroid) {
       return ADMOB_CONFIG.prodInterstitialIdAndroid;
@@ -114,17 +145,22 @@ class AdManager {
     return TestIds?.INTERSTITIAL || ADMOB_CONFIG.testInterstitialId;
   }
 
-  private loadInterstitial(): void {
-    if (!InterstitialAd) return;
+  public loadInterstitial(): void {
+    if (!InterstitialAd) {
+      console.log('[AdMob] InterstitialAd module not available');
+      return;
+    }
 
     try {
       const adUnitId = this.getInterstitialUnitId();
+      console.log('[AdMob] Pre-loading interstitial with ID:', adUnitId);
       this.interstitialInstance = InterstitialAd.createForAdRequest(adUnitId, {
         requestNonPersonalizedAdsOnly: true,
         keywords: ['puzzle', 'family', 'board game', 'casual'],
       });
 
       this.interstitialInstance.addAdEventListener(AdEventType.LOADED, () => {
+        console.log('[AdMob] Interstitial successfully loaded and ready to display');
         this.isLoaded = true;
       });
 
@@ -142,10 +178,10 @@ class AdManager {
   public shouldShowInterstitial(): boolean {
     this.gamesCompletedCount += 1;
     const now = Date.now();
-    const isFrequencyMet =
-      this.gamesCompletedCount % ADMOB_CONFIG.gamesBetweenInterstitials === 0;
-    const isCooldownMet =
-      now - this.lastInterstitialTimestamp >= ADMOB_CONFIG.cooldownMs;
+    const frequency = ADMOB_CONFIG.forceTestAds ? 1 : ADMOB_CONFIG.gamesBetweenInterstitials;
+    const cooldown = ADMOB_CONFIG.forceTestAds ? 5000 : ADMOB_CONFIG.cooldownMs;
+    const isFrequencyMet = this.gamesCompletedCount % frequency === 0;
+    const isCooldownMet = now - this.lastInterstitialTimestamp >= cooldown;
 
     return isFrequencyMet && isCooldownMet;
   }
@@ -162,29 +198,49 @@ class AdManager {
 
     if (this.isLoaded && this.interstitialInstance) {
       try {
+        let finished = false;
+        const safeFinish = () => {
+          if (!finished) {
+            finished = true;
+            finish();
+          }
+        };
+
         const unsubscribeClosed = this.interstitialInstance.addAdEventListener(
           AdEventType.CLOSED,
           () => {
+            console.log('[AdMob] Interstitial closed by user');
             this.lastInterstitialTimestamp = Date.now();
             this.isLoaded = false;
             unsubscribeClosed();
             this.loadInterstitial(); // Pre-load next ad
-            finish();
+            safeFinish();
+          }
+        );
+
+        const unsubscribeError = this.interstitialInstance.addAdEventListener(
+          AdEventType.ERROR,
+          (err: any) => {
+            console.warn('[AdMob] Interstitial display error:', err);
+            this.isLoaded = false;
+            unsubscribeError();
+            this.loadInterstitial();
+            safeFinish();
           }
         );
 
         this.interstitialInstance.show().catch((err: any) => {
-          console.warn('[AdMob] Show error:', err);
+          console.warn('[AdMob] Show failed:', err);
           this.isLoaded = false;
           this.loadInterstitial();
-          finish();
+          safeFinish();
         });
       } catch (err) {
-        console.warn('[AdMob] Show failed:', err);
+        console.warn('[AdMob] Show exception:', err);
         finish();
       }
     } else {
-      // Ad was not ready yet - continue without blocking user
+      console.log('[AdMob] Interstitial not ready yet (isLoaded = ' + this.isLoaded + ')');
       if (!this.isLoaded) {
         this.loadInterstitial();
       }

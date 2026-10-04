@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { HistoryScreen } from './src/screens/HistoryScreen';
 import { Player } from './src/types/game';
 import { THEME } from './src/constants/theme';
 import { AdBanner } from './src/ads/AdBanner';
+import { adManager } from './src/ads/adManager';
 
 type Screen = 'setup' | 'game' | 'history';
 
@@ -22,6 +23,10 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('setup');
   const [activeGame, setActiveGame] = useState<ActiveGameConfig | null>(null);
   const [lastSetup, setLastSetup] = useState<ActiveGameConfig | null>(null);
+
+  useEffect(() => {
+    adManager.initialize();
+  }, []);
 
   const handleStartGame = (
     rows: number,

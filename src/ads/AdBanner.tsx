@@ -28,6 +28,16 @@ export const AdBanner: React.FC<AdBannerProps> = ({ testMode = true }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Retry loading banner after 10 seconds if a network hiccup occurred
+  useEffect(() => {
+    if (adFailed) {
+      const retryTimer = setTimeout(() => {
+        setAdFailed(false);
+      }, 10000);
+      return () => clearTimeout(retryTimer);
+    }
+  }, [adFailed]);
+
   const adUnitId = adManager.getBannerUnitId();
   const canShowBanner = Boolean(
     BannerAd &&

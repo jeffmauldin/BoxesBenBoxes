@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { GameState } from '../types/game';
 import { THEME } from '../constants/theme';
+import { adManager } from '../ads/adManager';
 
 interface GreatGameCelebrationProps {
   visible: boolean;
@@ -88,6 +89,31 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
       });
     }
   }, [visible]);
+
+  // Give player 1.5 seconds to celebrate and view results before showing ad
+  useEffect(() => {
+    let adTimer: NodeJS.Timeout | null = null;
+    if (visible) {
+      adTimer = setTimeout(() => {
+        adManager.showInterstitialIfEligible();
+      }, 1500);
+    }
+    return () => {
+      if (adTimer) clearTimeout(adTimer);
+    };
+  }, [visible]);
+
+  const handleRematchPress = () => {
+    adManager.showInterstitialIfEligible(() => {
+      onRematch();
+    });
+  };
+
+  const handleNewSetupPress = () => {
+    adManager.showInterstitialIfEligible(() => {
+      onNewSetup();
+    });
+  };
 
   if (!visible) return null;
 
@@ -211,7 +237,7 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
               {/* Primary action to return to setup */}
               <TouchableOpacity
                 style={styles.setupBtn}
-                onPress={onNewSetup}
+                onPress={handleNewSetupPress}
                 activeOpacity={0.8}
               >
                 <Text style={styles.setupBtnText}>⚙ Change Game Setup</Text>
@@ -223,7 +249,7 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
               {/* Rematch action */}
               <TouchableOpacity
                 style={styles.rematchBtn}
-                onPress={onRematch}
+                onPress={handleRematchPress}
                 activeOpacity={0.8}
               >
                 <Text style={styles.rematchBtnText}>🔄 Play Rematch (Same Setup)</Text>

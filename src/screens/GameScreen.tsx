@@ -20,6 +20,7 @@ import { ScoreBar } from '../components/ScoreBar';
 import { BoardView } from '../components/BoardView';
 import { GreatGameCelebration } from '../components/GreatGameCelebration';
 import { AdBanner } from '../ads/AdBanner';
+import { adManager } from '../ads/adManager';
 import { THEME } from '../constants/theme';
 
 interface GameScreenProps {
@@ -163,17 +164,21 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   };
 
   const handleRematch = () => {
-    if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
-    setIsAIThinking(false);
-    setShowCelebration(false);
-    setGameState(createInitialState(gridRows, gridCols, players, allowUndo));
+    adManager.showInterstitialIfEligible(() => {
+      if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
+      setIsAIThinking(false);
+      setShowCelebration(false);
+      setGameState(createInitialState(gridRows, gridCols, players, allowUndo));
+    });
   };
 
   const handleExitPress = () => {
     if (gameState.isGameOver) {
-      if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
-      setShowCelebration(false);
-      onExitToMenu();
+      adManager.showInterstitialIfEligible(() => {
+        if (aiTimeoutRef.current) clearTimeout(aiTimeoutRef.current);
+        setShowCelebration(false);
+        onExitToMenu();
+      });
     } else {
       setQuitModalVisible(true);
     }
@@ -247,7 +252,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         <View style={styles.gameOverBar}>
           <TouchableOpacity
             style={styles.gameOverSetupBtn}
-            onPress={onExitToMenu}
+            onPress={handleExitPress}
             activeOpacity={0.8}
           >
             <Text style={styles.gameOverSetupBtnText}>⚙ Change Setup</Text>
