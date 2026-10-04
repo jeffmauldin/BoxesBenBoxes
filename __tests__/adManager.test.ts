@@ -44,4 +44,31 @@ describe('adManager', () => {
     adManager.showInterstitialIfEligible(mockCallback);
     expect(mockCallback).toHaveBeenCalled();
   });
+
+  it('strictly prevents a second interstitial during the same game cycle', () => {
+    // First trigger of game cycle
+    adManager.showInterstitialIfEligible();
+    // Subsequent checks during the same celebration or menu transition must be false
+    expect(adManager.shouldShowInterstitial()).toBe(false);
+
+    const secondCallback = jest.fn();
+    adManager.showInterstitialIfEligible(secondCallback);
+    expect(secondCallback).toHaveBeenCalled();
+  });
+
+  it('allows a new interstitial once next game is started and cooldown passes', () => {
+    adManager.showInterstitialIfEligible();
+    expect(adManager.shouldShowInterstitial()).toBe(false);
+
+    // Starting a new game resets the current game flag
+    adManager.onGameStarted();
+
+    // Still blocked if within cooldown window
+    expect(adManager.shouldShowInterstitial()).toBe(false);
+
+    // Fast-forward beyond cooldown
+    jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 20000);
+    expect(adManager.shouldShowInterstitial()).toBe(true);
+    jest.restoreAllMocks();
+  });
 });

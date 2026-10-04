@@ -90,26 +90,38 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
     }
   }, [visible]);
 
+  const adTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Give player 1.5 seconds to celebrate and view results before showing ad
   useEffect(() => {
-    let adTimer: NodeJS.Timeout | null = null;
     if (visible) {
-      adTimer = setTimeout(() => {
+      adTimerRef.current = setTimeout(() => {
         adManager.showInterstitialIfEligible();
       }, 1500);
     }
     return () => {
-      if (adTimer) clearTimeout(adTimer);
+      if (adTimerRef.current) {
+        clearTimeout(adTimerRef.current);
+        adTimerRef.current = null;
+      }
     };
   }, [visible]);
 
   const handleRematchPress = () => {
+    if (adTimerRef.current) {
+      clearTimeout(adTimerRef.current);
+      adTimerRef.current = null;
+    }
     adManager.showInterstitialIfEligible(() => {
       onRematch();
     });
   };
 
   const handleNewSetupPress = () => {
+    if (adTimerRef.current) {
+      clearTimeout(adTimerRef.current);
+      adTimerRef.current = null;
+    }
     adManager.showInterstitialIfEligible(() => {
       onNewSetup();
     });

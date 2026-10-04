@@ -54,10 +54,10 @@ export const ADMOB_CONFIG = {
   forceTestAds: true,
 
   // User experience rules:
-  // When testing, trigger after every completed game; in prod, every 2 games
+  // Strictly 1 ad per completed game:
   gamesBetweenInterstitials: 1,
-  // Cooldown between interstitials (5s during testing, 60s in production)
-  cooldownMs: 5 * 1000,
+  // Cooldown between interstitials (15 seconds minimum to prevent rapid consecutive spam)
+  cooldownMs: 15 * 1000,
 
   // COPPA & Google Play Families Kid-Safety Enforcement:
   tagForChildDirectedTreatment: true,
@@ -72,6 +72,7 @@ class AdManager {
   private interstitialInstance: any = null;
   private isLoaded = false;
   private isInitialized = false;
+  private hasShownAdForCurrentGame = false;
 
   constructor() {
     this.initialize();
@@ -175,12 +176,31 @@ class AdManager {
     }
   }
 
+  /**
+   * Called when a new match is launched or rematched.
+   * Clears the ad-shown flag for the new game so exactly 1 ad can trigger when it completes.
+   */
+  public onGameStarted(): void {
+    this.hasShownAdForCurrentGame = false;
+  }
+
+  /**
+   * Evaluates whether an interstitial ad should be displayed.
+   * Enforces:
+   * 1. Strictly at most 1 ad per completed game.
+   * 2. Frequency requirement (1 ad per completed game).
+   * 3. Minimum cooldown window between back-to-back ad displays.
+   */
   public shouldShowInterstitial(): boolean {
-    this.gamesCompletedCount += 1;
+    if (this.hasShownAdForCurrentGame) {
+      return false;
+    }
+
     const now = Date.now();
     const frequency = ADMOB_CONFIG.forceTestAds ? 1 : ADMOB_CONFIG.gamesBetweenInterstitials;
-    const cooldown = ADMOB_CONFIG.forceTestAds ? 5000 : ADMOB_CONFIG.cooldownMs;
-    const isFrequencyMet = this.gamesCompletedCount % frequency === 0;
+    const cooldown = ADMOB_CONFIG.forceTestAds ? 15000 : ADMOB_CONFIG.cooldownMs;
+
+    const isFrequencyMet = (this.gamesCompletedCount + 1) % frequency === 0;
     const isCooldownMet = now - this.lastInterstitialTimestamp >= cooldown;
 
     return isFrequencyMet && isCooldownMet;
@@ -195,6 +215,11 @@ class AdManager {
       finish();
       return;
     }
+
+    // Immediately mark as consumed for this game so no other timer or button press triggers another ad
+    this.hasShownAdForCurrentGame = true;
+    this.gamesCompletedCount += 1;
+    this.lastInterstitialTimestamp = Date.now();
 
     if (this.isLoaded && this.interstitialInstance) {
       try {
@@ -213,7 +238,7 @@ class AdManager {
             this.lastInterstitialTimestamp = Date.now();
             this.isLoaded = false;
             unsubscribeClosed();
-            this.loadInterstitial(); // Pre-load next ad
+            this.loadInterstitial(); // Pre-load next ad for future game
             safeFinish();
           }
         );
@@ -250,6 +275,7 @@ class AdManager {
 
   public recordInterstitialShown(): void {
     this.lastInterstitialTimestamp = Date.now();
+    this.hasShownAdForCurrentGame = true;
   }
 
   public isInterstitialReady(): boolean {
@@ -259,6 +285,7 @@ class AdManager {
   public resetCounters(): void {
     this.gamesCompletedCount = 0;
     this.lastInterstitialTimestamp = 0;
+    this.hasShownAdForCurrentGame = false;
   }
 }
 

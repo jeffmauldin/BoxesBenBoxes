@@ -50,6 +50,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pencilAnim = useRef(new Animated.Value(0)).current;
 
+  // Reset ad state so exactly 1 ad can be shown for this game
+  useEffect(() => {
+    adManager.onGameStarted();
+  }, []);
+
   // AI thinking pencil wiggle animation
   useEffect(() => {
     if (isAIThinking) {
@@ -169,6 +174,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       setIsAIThinking(false);
       setShowCelebration(false);
       setGameState(createInitialState(gridRows, gridCols, players, allowUndo));
+      adManager.onGameStarted();
     });
   };
 
