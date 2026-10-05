@@ -163,7 +163,8 @@ npm run build:aab
 ```
 
 ### Verified Cloud Builds:
-- **Standalone Android APK v1.0.2 (Google Ads - Strictly 1 Ad Per Completed Game)**: [Download Direct APK Build `2eaa96e0`](https://expo.dev/artifacts/eas/Isd6_pnzbp-3LAlCUS64DfmT3Ycg7FjZnJmLu8692WY.apk) (version `1.0.2`, versionCode `3`)
+- **Google Play Store Release Bundle v1.0.2 (`.aab`)**: [Download Direct AAB Build `7ace24ae`](https://expo.dev/artifacts/eas/hmF8YeKLHFqXc0dtW-a_IVyp35118h4JLISDMy-nYBM.aab) (version `1.0.2`, versionCode `3`)
+- **Standalone Android APK v1.0.2 (Strictly 1 Ad Per Completed Game)**: [Download Direct APK Build `2eaa96e0`](https://expo.dev/artifacts/eas/Isd6_pnzbp-3LAlCUS64DfmT3Ycg7FjZnJmLu8692WY.apk) (version `1.0.2`, versionCode `3`)
 - **Expo Project Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
 
 When making changes to this repo:
