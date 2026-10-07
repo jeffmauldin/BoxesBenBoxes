@@ -23,7 +23,7 @@ This document is written for AI agents and human developers who need to understa
 - **Local Storage**: `@react-native-async-storage/async-storage` for match records and player setup preferences.
 - **Cloud Database**: Google Firebase Firestore via direct REST API (`src/logic/worldSync.ts`).
 - **Web Hosting**: GitHub Pages serving the interactive canvas match replayer from `docs/index.html`.
-- **Testing**: Jest + `ts-jest` for automated logic verification (16 unit tests).
+- **Testing**: Jest + `ts-jest` for automated logic verification (23 unit tests across 4 suites).
 - **Cloud Builds**: Expo Application Services (EAS Build) for building Android `.apk` and `.aab` bundles (`eas.json`).
 
 ---
@@ -135,6 +135,7 @@ Under COPPA and Google Play Families policy:
   - App ID: `ca-app-pub-4537394443614417~6765728644`
   - Android Banner Unit ID: `ca-app-pub-4537394443614417/9964512085`
 - Interstitial ads are capped to at most **once every 2 completed games**, with a minimum **2-minute cooldown**.
+- **Post-Game Ad Pause (`GreatGameCelebration.tsx`)**: When a match completes, an automatic **4.0-second pause** (`POST_GAME_AD_DELAY_MS = 4000`) lets players enjoy the victory banner, inspect box scores, and watch the **55-piece edge-to-edge confetti shower** before an interstitial displays. Tapping "Play Rematch" or "Change Game Setup" cancels the timer and transitions immediately without delay.
 - Fallback / Expo Go banner displays rotating restaurant placemat tips and strategy trivia.
 
 ---

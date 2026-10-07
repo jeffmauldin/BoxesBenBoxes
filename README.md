@@ -33,7 +33,7 @@ Remember waiting for food at a restaurant booth with your family, armed with cra
 - **Pencil Wiggle Observation Delay**: Computer turns feature an animated wiggling pencil (✏️) and a ~700ms pause so kids have time to watch the board and anticipate the move.
 - **Friendly Anti-AI Prompt**: Reminds players once per session that *"It's more fun to play a person!"* to encourage real human interaction.
 - **Faint-to-Bold Visual Lines**: Unclaimed edges appear as faint guide lines (`#DCD5C3`). Touching any line highlights it with generous **44pt touch hitboxes** and turns it into a bold 6pt crayon stroke in that player's distinct color.
-- **Great Game! Celebration**: End-of-game celebration with animated falling confetti particles, winner medals, and interactive board replay.
+- **Great Game! Celebration**: End-of-game celebration with an edge-to-edge 55-piece animated confetti cascade, winner medals, relaxed 4.0s pause before ads, and interactive board replay.
 - **Optional Move Undo**: Pre-game toggle (default **OFF** for authentic paper-and-pencil commitment). Strictly disabled once the game concludes.
 - **Live 24/7 Global Match Feed**:
   - Every completed match automatically syncs to a Google Firebase Firestore cloud database.
@@ -97,7 +97,7 @@ EAS builds the application in the cloud and provides a direct download link and 
 # Install dependencies
 npm install
 
-# Run automated test suite (21 unit tests across 4 suites)
+# Run automated test suite (23 unit tests across 4 suites)
 npm test
 
 # Typecheck with TypeScript

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { GameState } from '../types/game';
 import { THEME } from '../constants/theme';
@@ -22,6 +23,9 @@ interface GreatGameCelebrationProps {
 }
 
 const CONFETTI_COLORS = ['#E53935', '#1E88E5', '#43A047', '#FB8C00', '#8E24AA', '#FFD54F', '#00ACC1'];
+const CONFETTI_COUNT = 55;
+const POST_GAME_AD_DELAY_MS = 4000;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
   visible,
@@ -34,16 +38,22 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  // Generate 24 animated confetti pieces
+  // Generate 55 animated confetti pieces spanning full screen
   const confettiAnimValues = useRef(
-    Array.from({ length: 24 }, () => ({
-      y: new Animated.Value(-20),
-      x: (Math.random() - 0.5) * 280,
-      rot: new Animated.Value(0),
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      size: Math.random() * 8 + 8,
-      delay: Math.random() * 400,
-    }))
+    Array.from({ length: CONFETTI_COUNT }, () => {
+      const isRibbon = Math.random() > 0.55;
+      const size = Math.random() * 8 + 7;
+      return {
+        y: new Animated.Value(-30),
+        x: (Math.random() - 0.5) * (SCREEN_WIDTH * 0.95),
+        rot: new Animated.Value(0),
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        width: isRibbon ? size * 0.7 : size,
+        height: isRibbon ? size * 1.6 : size * 0.6,
+        delay: Math.random() * 700,
+        duration: 2400 + Math.random() * 1200,
+      };
+    })
   ).current;
 
   useEffect(() => {
@@ -68,13 +78,13 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
           Animated.delay(item.delay),
           Animated.parallel([
             Animated.timing(item.y, {
-              toValue: 400,
-              duration: 2200 + Math.random() * 800,
+              toValue: SCREEN_HEIGHT + 100,
+              duration: item.duration,
               useNativeDriver: true,
             }),
             Animated.timing(item.rot, {
               toValue: 1,
-              duration: 2200,
+              duration: item.duration,
               useNativeDriver: true,
             }),
           ]),
@@ -84,7 +94,7 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
       scaleAnim.setValue(0.3);
       opacityAnim.setValue(0);
       confettiAnimValues.forEach((item) => {
-        item.y.setValue(-20);
+        item.y.setValue(-30);
         item.rot.setValue(0);
       });
     }
@@ -92,12 +102,12 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
 
   const adTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Give player 1.5 seconds to celebrate and view results before showing ad
+  // Give players 4 seconds to celebrate, view results and enjoy confetti before showing ad
   useEffect(() => {
     if (visible) {
       adTimerRef.current = setTimeout(() => {
         adManager.showInterstitialIfEligible();
-      }, 1500);
+      }, POST_GAME_AD_DELAY_MS);
     }
     return () => {
       if (adTimerRef.current) {
@@ -155,8 +165,8 @@ export const GreatGameCelebration: React.FC<GreatGameCelebrationProps> = ({
                 style={[
                   styles.confettiPiece,
                   {
-                    width: item.size,
-                    height: item.size * 0.6,
+                    width: item.width,
+                    height: item.height,
                     backgroundColor: item.color,
                     transform: [
                       { translateX: item.x },
@@ -309,7 +319,7 @@ const styles = StyleSheet.create({
   },
   confettiPiece: {
     position: 'absolute',
-    top: 50,
+    top: 0,
     borderRadius: 2,
   },
   card: {
