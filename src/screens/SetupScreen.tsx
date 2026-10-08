@@ -352,7 +352,7 @@ let sessionDismissedComputerPrompt = false;
         <View style={styles.header}>
           <View style={styles.headerTopRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.badgeLabel}>RESTAURANT PLACEMAT CLASSIC • v1.0.3</Text>
+              <Text style={styles.badgeLabel}>RESTAURANT PLACEMAT CLASSIC • v1.0.4</Text>
               <Text style={styles.title}>BoxesBenBoxes</Text>
             </View>
             <TouchableOpacity

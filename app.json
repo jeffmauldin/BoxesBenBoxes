@@ -2,7 +2,7 @@
   "expo": {
     "name": "BoxesBenBoxes",
     "slug": "boxesbenboxes",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.jeffmauldinsoftware.boxesbenboxes",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#FAF7EE",
         "foregroundImage": "./assets/icon.png"

@@ -70,10 +70,9 @@ Remember waiting for food at a restaurant booth with your family, armed with cra
 
 The project includes pre-configured **EAS (Expo Application Services)** build profiles in [`eas.json`](file:///workspaces/boxes-game/eas.json):
 
+- **Verified Standalone APK v1.0.3 (4s Ad Pause & 55 Confetti Pieces)**: [Download BoxesBenBoxes v1.0.3 APK](https://expo.dev/artifacts/eas/hHg5_xONETFsM_HB_S-fC5dNFWP1mc0Mhfl2BN8XDZk.apk) (Build `a655ebea-2e48-4257-89da-269b6d24ee17`, `versionCode: 4`)
 - **Verified Google Play Store AAB Bundle v1.0.2**: [Download BoxesBenBoxes v1.0.2 AAB](https://expo.dev/artifacts/eas/hmF8YeKLHFqXc0dtW-a_IVyp35118h4JLISDMy-nYBM.aab) (Upload directly to Google Play Console)
-- **Verified Standalone APK v1.0.2 (1 Ad Per Game & Version Badge)**: [Download BoxesBenBoxes v1.0.2 APK](https://expo.dev/artifacts/eas/Isd6_pnzbp-3LAlCUS64DfmT3Ycg7FjZnJmLu8692WY.apk) (Direct 1-tap installation)
 - **Expo Cloud Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
-- **AAB Build ID**: `7ace24ae-8070-4c05-9abc-6b26f927eefd` | **APK Build ID**: `2eaa96e0-7a2a-4ad0-a63e-0effa4c246c9` (Version `1.0.2`, `versionCode: 3`)
 
 To trigger new builds:
 ```bash
