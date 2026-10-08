@@ -70,6 +70,7 @@ Remember waiting for food at a restaurant booth with your family, armed with cra
 
 The project includes pre-configured **EAS (Expo Application Services)** build profiles in [`eas.json`](file:///workspaces/boxes-game/eas.json):
 
+- **Verified Standalone APK v1.0.4 (World Tracker Web Link + 4s Ad Pause + 55 Confetti Pieces)**: [Download BoxesBenBoxes v1.0.4 APK](https://expo.dev/artifacts/eas/1qF-y_zeVsOalIz55bGN5L0ICAmjkF5ON2e49yfkZpU.apk) (Build `81831731-dfe1-4ff6-b817-f690925e20c6`, `versionCode: 5`)
 - **Verified Standalone APK v1.0.3 (4s Ad Pause & 55 Confetti Pieces)**: [Download BoxesBenBoxes v1.0.3 APK](https://expo.dev/artifacts/eas/hHg5_xONETFsM_HB_S-fC5dNFWP1mc0Mhfl2BN8XDZk.apk) (Build `a655ebea-2e48-4257-89da-269b6d24ee17`, `versionCode: 4`)
 - **Verified Google Play Store AAB Bundle v1.0.2**: [Download BoxesBenBoxes v1.0.2 AAB](https://expo.dev/artifacts/eas/hmF8YeKLHFqXc0dtW-a_IVyp35118h4JLISDMy-nYBM.aab) (Upload directly to Google Play Console)
 - **Expo Cloud Dashboard**: [BoxesBenBoxes on Expo](https://expo.dev/accounts/jamsoft68/projects/boxesbenboxes)
