@@ -10,6 +10,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_PLAYER_PALETTES, GAME_PRESETS } from '../constants/presets';
@@ -167,6 +168,12 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   const handleUpdateHandle = (newHandle: string) => {
     setPlayerHandle(newHandle);
     saveDeviceProfile({ handle: newHandle.trim() || undefined });
+  };
+
+  const handleOpenTrackerWebsite = () => {
+    Linking.openURL('https://jeffmauldin.github.io/BoxesBenBoxes/').catch((err) => {
+      console.warn('Could not open tracker website:', err);
+    });
   };
 
 
@@ -631,6 +638,13 @@ let sessionDismissedComputerPrompt = false;
             autoCorrect={false}
             returnKeyType="done"
           />
+          <TouchableOpacity
+            style={styles.trackerLinkBtn}
+            activeOpacity={0.7}
+            onPress={handleOpenTrackerWebsite}
+          >
+            <Text style={styles.trackerLinkText}>🌐 View World Match Tracker ↗</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.optionDivider} />
@@ -1004,6 +1018,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: THEME.textPrimary,
     marginTop: 8,
+  },
+  trackerLinkBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  trackerLinkText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: THEME.accent,
+    textDecorationLine: 'underline',
   },
   historyOptionRow: {
     flexDirection: 'row',
