@@ -15,7 +15,7 @@ const PLACEMAT_TIPS = [
   '👫 Play together: Games are always more fun with someone across the table!',
 ];
 
-export const AdBanner: React.FC<AdBannerProps> = ({ testMode = true }) => {
+export const AdBanner: React.FC<AdBannerProps> = ({ testMode = false }) => {
   const [tipIndex, setTipIndex] = useState(0);
   const [adLoaded, setAdLoaded] = useState(false);
   const [adFailed, setAdFailed] = useState(false);

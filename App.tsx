@@ -65,7 +65,7 @@ export default function App() {
                 onOpenHistory={handleOpenHistory}
                 lastSetup={lastSetup}
               />
-              <AdBanner testMode={true} />
+              <AdBanner testMode={false} />
             </>
           )}
 

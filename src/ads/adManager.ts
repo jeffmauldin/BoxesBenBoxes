@@ -47,11 +47,11 @@ export const ADMOB_CONFIG = {
 
   // Production Ad Unit IDs:
   prodBannerIdAndroid: 'ca-app-pub-4537394443614417/9964512085',
-  prodInterstitialIdAndroid: '',
+  prodInterstitialIdAndroid: 'ca-app-pub-4537394443614417/7650088360',
 
-  // Set forceTestAds: true during testing so test ads load 100% of the time
-  // without relying on Google Play Console / AdMob account approval.
-  forceTestAds: true,
+  // Set forceTestAds: false for production Play Store releases.
+  // Note: Local development (__DEV__) still automatically uses test ads in getBannerUnitId/getInterstitialUnitId.
+  forceTestAds: false,
 
   // User experience rules:
   // Strictly 1 ad per completed game:
@@ -128,8 +128,7 @@ class AdManager {
     if (ADMOB_CONFIG.forceTestAds) {
       return TestIds?.BANNER || ADMOB_CONFIG.testBannerId;
     }
-    const isProd = !__DEV__;
-    if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodBannerIdAndroid) {
+    if (Platform.OS === 'android' && ADMOB_CONFIG.prodBannerIdAndroid) {
       return ADMOB_CONFIG.prodBannerIdAndroid;
     }
     return TestIds?.BANNER || ADMOB_CONFIG.testBannerId;
@@ -139,8 +138,7 @@ class AdManager {
     if (ADMOB_CONFIG.forceTestAds) {
       return TestIds?.INTERSTITIAL || ADMOB_CONFIG.testInterstitialId;
     }
-    const isProd = !__DEV__;
-    if (isProd && Platform.OS === 'android' && ADMOB_CONFIG.prodInterstitialIdAndroid) {
+    if (Platform.OS === 'android' && ADMOB_CONFIG.prodInterstitialIdAndroid) {
       return ADMOB_CONFIG.prodInterstitialIdAndroid;
     }
     return TestIds?.INTERSTITIAL || ADMOB_CONFIG.testInterstitialId;

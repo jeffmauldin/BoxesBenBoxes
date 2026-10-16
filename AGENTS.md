@@ -134,6 +134,7 @@ Under COPPA and Google Play Families policy:
   - Account: `jeffmauldinsoftware@gmail.com`
   - App ID: `ca-app-pub-4537394443614417~6765728644`
   - Android Banner Unit ID: `ca-app-pub-4537394443614417/9964512085`
+  - Android Interstitial Unit ID (`AfterGameAds`): `ca-app-pub-4537394443614417/7650088360`
 - Interstitial ads are capped to at most **once every 2 completed games**, with a minimum **2-minute cooldown**.
 - **Post-Game Ad Pause (`GreatGameCelebration.tsx`)**: When a match completes, an automatic **4.0-second pause** (`POST_GAME_AD_DELAY_MS = 4000`) lets players enjoy the victory banner, inspect box scores, and watch the **55-piece edge-to-edge confetti shower** before an interstitial displays. Tapping "Play Rematch" or "Change Game Setup" cancels the timer and transitions immediately without delay.
 - Fallback / Expo Go banner displays rotating restaurant placemat tips and strategy trivia.

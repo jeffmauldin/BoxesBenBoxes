@@ -12,18 +12,27 @@ describe('adManager', () => {
     adManager.resetCounters();
   });
 
-  it('provides official Google Test Banner Unit ID when forceTestAds is true', () => {
-    expect(ADMOB_CONFIG.forceTestAds).toBe(true);
-    const bannerId = adManager.getBannerUnitId();
-    expect(bannerId).toBe(ADMOB_CONFIG.testBannerId);
-    expect(bannerId).toBe('ca-app-pub-3940256099942544/6300978111');
+  it('provides production Banner and Interstitial Unit IDs when forceTestAds is false', () => {
+    expect(ADMOB_CONFIG.forceTestAds).toBe(false);
+    expect(adManager.getBannerUnitId()).toBe('ca-app-pub-4537394443614417/9964512085');
+    expect(adManager.getInterstitialUnitId()).toBe('ca-app-pub-4537394443614417/7650088360');
   });
 
-  it('provides official Google Test Interstitial Unit ID when forceTestAds is true', () => {
-    expect(ADMOB_CONFIG.forceTestAds).toBe(true);
-    const interstitialId = adManager.getInterstitialUnitId();
-    expect(interstitialId).toBe(ADMOB_CONFIG.testInterstitialId);
-    expect(interstitialId).toBe('ca-app-pub-3940256099942544/1033173712');
+  it('enforces strict COPPA & Google Play Families G-rated kid-safe ad configuration', () => {
+    expect(ADMOB_CONFIG.tagForChildDirectedTreatment).toBe(true);
+    expect(ADMOB_CONFIG.maxAdContentRating).toBe('G');
+    expect(ADMOB_CONFIG.tagForUnderAgeOfConsent).toBe(true);
+    expect(ADMOB_CONFIG.nonPersonalizedAdsOnly).toBe(true);
+  });
+
+  it('falls back to official Google Test Unit IDs when forceTestAds is true', () => {
+    ADMOB_CONFIG.forceTestAds = true;
+    try {
+      expect(adManager.getBannerUnitId()).toBe('ca-app-pub-3940256099942544/6300978111');
+      expect(adManager.getInterstitialUnitId()).toBe('ca-app-pub-3940256099942544/1033173712');
+    } finally {
+      ADMOB_CONFIG.forceTestAds = false;
+    }
   });
 
   it('evaluates interstitial eligibility after 1 game in test mode', () => {

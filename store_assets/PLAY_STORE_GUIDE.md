@@ -2,6 +2,7 @@
 **Account:** `jeffmauldinsoftware@gmail.com` | **Package Identifier:** `com.jeffmauldinsoftware.boxesbenboxes`
 **AdMob App ID:** `ca-app-pub-4537394443614417~6765728644`
 **AdMob Banner Unit ID:** `ca-app-pub-4537394443614417/9964512085`
+**AdMob Interstitial Unit ID (`AfterGameAds`):** `ca-app-pub-4537394443614417/7650088360`
 **Live Privacy Policy:** [https://jeffmauldin.github.io/BoxesBenBoxes/privacy.html](https://jeffmauldin.github.io/BoxesBenBoxes/privacy.html)
 **Live World Match Tracker:** [https://jeffmauldin.github.io/BoxesBenBoxes/](https://jeffmauldin.github.io/BoxesBenBoxes/)
 
@@ -42,6 +43,7 @@ Before submitting to the Play Store, you can generate an installable `.apk` file
 Your AdMob app **BoxesBenBoxes** is already configured under `jeffmauldinsoftware@gmail.com`!
 - **App ID:** `ca-app-pub-4537394443614417~6765728644`
 - **Banner Ad Unit:** `ca-app-pub-4537394443614417/9964512085`
+- **Interstitial Ad Unit (`AfterGameAds`):** `ca-app-pub-4537394443614417/7650088360`
 - Wired into [`src/ads/adManager.ts`](file:///workspaces/boxes-game/src/ads/adManager.ts) with full COPPA and Google Play Families G-rated child-safety compliance.
 
 ---
